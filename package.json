@@ -1,0 +1,7 @@
+{
+  "name": "my-app",
+  "scripts": {
+    "dev": "concurrently \"cd elscholar-api && nodemon src/index.js\" \"cd elscholar-ui && npm start\""
+  }
+}
+

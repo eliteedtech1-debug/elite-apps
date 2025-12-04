@@ -1,0 +1,23 @@
+{
+  "entry_date": "2025-11-02",
+  "reference_type": "INCOME",
+  "reference_id": "TEST_INC_001",
+  "description": "Income: Test after restart",
+  "journal_lines": [
+    {
+      "account_id": 3,
+      "debit_amount": 25000,
+      "credit_amount": 0,
+      "description": "Test income entry"
+    },
+    {
+      "account_id": 37,
+      "debit_amount": 0,
+      "credit_amount": 25000,
+      "description": "Test income entry"
+    }
+  ],
+  "total_amount": 25000,
+  "school_id": "SCH/1",
+  "branch_id": "BRCH00001"
+}

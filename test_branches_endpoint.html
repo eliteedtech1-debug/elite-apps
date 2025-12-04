@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Branches Endpoint</title>
+</head>
+<body>
+    <h1>Test Branches Endpoint</h1>
+    <button onclick=\"testBranches()\">Test /branches endpoint</button>
+    <div id=\"result\"></div>
+
+    <script>
+        async function testBranches() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'Testing...';
+            
+            try {
+                const response = await fetch(\"http://localhost:34567/branches?query_type=select&school_id=SCH/1\", {
+                    \"headers\": {
+                        \"accept\": \"application/json\",
+                        \"accept-language\": \"en-US,en;q=0.9\",
+                        \"authorization\": \"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NzEyLCJ1c2VyX3R5cGUiOiJBZG1pbiIsInNjaG9vbF9pZCI6IlNDSC8xIiwiYnJhbmNoX2lkIjpudWxsLCJpYXQiOjE3NTc4MDQ2MzksImV4cCI6MTc1Nzg5MTAzOX0.w6iy51Uj9pUUiQJgiIAuVODalScq3cIG-Yn89lD1pwM\",
+                        \"cache-control\": \"no-cache\",
+                        \"content-type\": \"application/json\",
+                        \"pragma\": \"no-cache\",
+                        \"sec-ch-ua\": '\"Chromium\";v=\"140\", \"Not=A?Brand\";v=\"24\", \"Google Chrome\";v=\"140\"',
+                        \"sec-ch-ua-mobile\": \"?0\",
+                        \"sec-ch-ua-platform\": '\"macOS\"',
+                        \"sec-fetch-dest\": \"empty\",
+                        \"sec-fetch-mode\": \"cors\",
+                        \"sec-fetch-site\": \"same-site\",
+                        \"x-branch-id\": \"BRCH00001\",
+                        \"x-school-id\": \"SCH/1\"
+                    },
+                    \"referrer\": \"http://localhost:3000/\",
+                    \"body\": null,
+                    \"method\": \"GET\",
+                    \"mode\": \"cors\",
+                    \"credentials\": \"include\"
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                resultDiv.innerHTML = `
+                    <h3>Success!</h3>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <h3>Error!</h3>
+                    <p style=\"color: red;\">${error.message}</p>
+                    <pre>${error.stack || ''}</pre>
+                `;
+                console.error('Fetch error:', error);
+            }
+        }
+    </script>
+</body>
+</html>"

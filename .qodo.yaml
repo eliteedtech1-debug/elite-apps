@@ -1,0 +1,262 @@
+# Qodo Configuration for Elite Scholar Project
+# This configuration file defines how Qodo should analyze and work with your codebase
+
+# Project Information
+project:
+  name: "Elite Scholar"
+  description: "Full-stack educational management system with API backend and React frontend"
+  version: "1.0.0"
+  type: "fullstack"
+
+# Language and Framework Configuration
+languages:
+  primary: ["javascript", "typescript"]
+  secondary: ["sql", "html", "css", "scss"]
+
+frameworks:
+  backend:
+    - "express"
+    - "sequelize"
+    - "mysql"
+  frontend:
+    - "react"
+    - "redux"
+    - "antd"
+    - "bootstrap"
+
+# Directory Structure
+directories:
+  source:
+    - "elscholar-api/src"
+    - "elscholar-api/config"
+    - "elscholar-api/controllers"
+    - "elscholar-api/middleware"
+    - "elscholar-api/models"
+    - "elscholar-api/routes"
+    - "elscholar-api/services"
+    - "elscholar-api/utils"
+    - "elscholar-api/validation"
+    - "elscholar-ui/src"
+  
+  exclude:
+    - "node_modules"
+    - "build"
+    - "dist"
+    - ".git"
+    - "*.log"
+    - "*.tmp"
+    - ".DS_Store"
+    - "elscholar-api/build"
+    - "elscholar-ui/build"
+    - "elscholar-ui/dist"
+
+  tests:
+    - "elscholar-api/tests"
+    - "elscholar-ui/src/__tests__"
+    - "**/*.test.js"
+    - "**/*.test.ts"
+    - "**/*.spec.js"
+    - "**/*.spec.ts"
+
+  docs:
+    - "docs"
+    - "*.md"
+    - "elscholar-api/docs"
+    - "elscholar-ui/docs"
+
+# File Patterns
+files:
+  include:
+    - "**/*.js"
+    - "**/*.ts"
+    - "**/*.tsx"
+    - "**/*.jsx"
+    - "**/*.json"
+    - "**/*.sql"
+    - "**/*.md"
+    - "**/*.yaml"
+    - "**/*.yml"
+  
+  exclude:
+    - "package-lock.json"
+    - "yarn.lock"
+    - "*.min.js"
+    - "*.bundle.js"
+
+# Code Analysis Configuration
+analysis:
+  # Code quality checks
+  quality:
+    enabled: true
+    rules:
+      - "no-unused-vars"
+      - "no-console-logs"
+      - "consistent-naming"
+      - "proper-error-handling"
+  
+  # Security analysis
+  security:
+    enabled: true
+    scan_dependencies: true
+    check_vulnerabilities: true
+  
+  # Performance analysis
+  performance:
+    enabled: true
+    check_bundle_size: true
+    analyze_database_queries: true
+
+# Development Workflow
+workflow:
+  # Git integration
+  git:
+    enabled: true
+    auto_commit_messages: true
+    branch_naming_convention: "feature/task-description"
+  
+  # Testing
+  testing:
+    framework: "jest"
+    coverage_threshold: 80
+    auto_run_tests: false
+  
+  # Build process
+  build:
+    backend:
+      command: "npm run build"
+      output_dir: "elscholar-api/build"
+    frontend:
+      command: "npm run build"
+      output_dir: "elscholar-ui/dist"
+
+# Environment Configuration
+environments:
+  development:
+    api_url: "http://localhost:5000"
+    frontend_url: "http://localhost:3000"
+    database: "mysql://localhost:3306/elscholar_dev"
+  
+  staging:
+    api_url: "https://staging-api.elitescholar.com"
+    frontend_url: "https://staging.elitescholar.com"
+  
+  production:
+    api_url: "https://api.elitescholar.com"
+    frontend_url: "https://elitescholar.com"
+
+# Database Configuration
+database:
+  type: "mysql"
+  migrations_dir: "elscholar-api/migrations"
+  models_dir: "elscholar-api/models"
+  seeders_dir: "elscholar-api/seeders"
+
+# API Configuration
+api:
+  base_path: "elscholar-api"
+  routes_dir: "elscholar-api/routes"
+  controllers_dir: "elscholar-api/controllers"
+  middleware_dir: "elscholar-api/middleware"
+  documentation:
+    format: "openapi"
+    output: "elscholar-api/docs/api.yaml"
+
+# Frontend Configuration
+frontend:
+  base_path: "elscholar-ui"
+  components_dir: "elscholar-ui/src/components"
+  pages_dir: "elscholar-ui/src/pages"
+  styles_dir: "elscholar-ui/src/styles"
+  assets_dir: "elscholar-ui/src/assets"
+
+# Code Generation Templates
+templates:
+  component:
+    path: "elscholar-ui/src/components"
+    template: "react-functional-component"
+  
+  api_route:
+    path: "elscholar-api/routes"
+    template: "express-route"
+  
+  model:
+    path: "elscholar-api/models"
+    template: "sequelize-model"
+
+# Documentation
+documentation:
+  auto_generate: true
+  formats: ["markdown", "html"]
+  include_api_docs: true
+  include_component_docs: true
+
+# Deployment
+deployment:
+  backend:
+    platform: "node"
+    build_command: "npm run build"
+    start_command: "npm start"
+  
+  frontend:
+    platform: "static"
+    build_command: "npm run build"
+    output_dir: "dist"
+
+# Custom Commands
+commands:
+  dev:
+    description: "Start development servers"
+    steps:
+      - "cd elscholar-api && npm run dev"
+      - "cd elscholar-ui && npm start"
+  
+  build:
+    description: "Build both frontend and backend"
+    steps:
+      - "cd elscholar-api && npm run build"
+      - "cd elscholar-ui && npm run build"
+  
+  test:
+    description: "Run all tests"
+    steps:
+      - "cd elscholar-api && npm test"
+      - "cd elscholar-ui && npm test"
+
+# Integrations
+integrations:
+  # Version control
+  git:
+    enabled: true
+    hooks:
+      pre_commit: ["lint", "test"]
+      pre_push: ["build"]
+  
+  # CI/CD
+  ci_cd:
+    platform: "github_actions"
+    config_file: ".github/workflows/main.yml"
+  
+  # Monitoring
+  monitoring:
+    error_tracking: true
+    performance_monitoring: true
+
+# Qodo-specific settings
+qodo:
+  # AI assistance preferences
+  ai_assistance:
+    code_suggestions: true
+    auto_completion: true
+    code_review: true
+    documentation_generation: true
+  
+  # Learning preferences
+  learning:
+    track_patterns: true
+    suggest_improvements: true
+    provide_explanations: true
+  
+  # Collaboration
+  collaboration:
+    share_insights: true
+    team_learning: true

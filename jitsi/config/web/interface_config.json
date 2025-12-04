@@ -1,0 +1,132 @@
+{
+    // Custom interface configuration for local Jitsi server
+    
+    // Disable lobby by default
+    "ENABLE_LOBBY": false,
+    
+    // Disable prejoin page
+    "DISABLE_PREJOIN_PAGE": true,
+    
+    // Enable known domains for better security while disabling lobby
+    "ENABLE_KNOWN_DOMAINS": false,
+    
+    // Enable moderator features
+    "ENABLE_MODERATOR": true,
+    
+    // Configure toolbar buttons
+    "TOOLBAR_BUTTONS": [
+        "microphone", "camera", "closedcaptions", "desktop", "embedmeeting", 
+        "fullscreen", "fodeviceselection", "hangup", "profile", "chat", 
+        "recording", "settings", "raisehand", "videoquality", "filmstrip", 
+        "invite", "feedback", "stats", "shortcuts", "tileview", "videobackgroundblur", 
+        "download", "help", "mute-everyone", "mute-video-everyone", "security"
+    ],
+    
+    // Configure default language
+    "DEFAULT_LANGUAGE": "en",
+    
+    // Configure default local display name
+    "DEFAULT_LOCAL_DISPLAY_NAME": "Me",
+    
+    // Configure default remote display name
+    "DEFAULT_REMOTE_DISPLAY_NAME": "User",
+    
+    // Configure default subject
+    "DEFAULT_SUBJECT": "Jitsi Meeting",
+    
+    // Hide subject
+    "HIDE_SUBJECT": false,
+    
+    // Configure default start audio muted
+    "DEFAULT_START_AUDIO_MUTED": 10,
+    
+    // Configure default start video muted
+    "DEFAULT_START_WITH_VIDEO_MUTED": 10,
+    
+    // Configure start screen sharing muted
+    "START_SCREENSHARING_MUTED": false,
+    
+    // Configure start with audio only
+    "START_AUDIO_ONLY": false,
+    
+    // Configure start with sidenav button
+    "START_SILENT": false,
+    
+    // Configure remote video menu
+    "DISABLE_REMOTE_VIDEO_MENU": false,
+    
+    // Configure filmstrip
+    "FILM_STRIP_ONLY": false,
+    
+    // Configure invite functions
+    "HIDE_INVITE_MORE_HEADER": false,
+    
+    // Configure security options
+    "DISABLE_FOCUS_INDICATOR": false,
+    
+    // Configure audio levels
+    "DISABLE_AUDIO_LEVELS": false,
+    
+    // Configure audio quality
+    "AUDIO_QUALITY": {
+        "OPUS_BITRATE": 20000
+    },
+    
+    // Configure conference resolution
+    "constraints": {
+        "video": {
+            "height": {
+                "ideal": 720,
+                "max": 720,
+                "min": 240
+            }
+        }
+    },
+    
+    // Configure screensharing options
+    "desktopSharingFrameRate": {
+        "min": 5,
+        "max": 5
+    },
+    
+    // Configure video quality
+    "VIDEO_QUALITY": {
+        "maxBitratesVideo": {
+            "low": 200000,
+            "standard": 500000,
+            "high": 1500000,
+            "ultra": 2500000
+        },
+        "minHeightForQualityLandscape": 360,
+        "minHeightForQualityPortrait": 720
+    },
+    
+    // Conference start options
+    "CONFERENCE_START_TIME_PENALTY_THRESHOLD": 10,
+    
+    // Configure welcome page
+    "DISABLE_WELCOME_PAGE": false,
+    
+    // Configure close page
+    "DISABLE_CLOSE_PAGE": false,
+    
+    // Configure calendar integration
+    "ENABLE_CALENDAR_INTEGRATION": false,
+    
+    // Configure recording
+    "fileRecordingsServiceEnabled": false,
+    "liveStreamingEnabled": false,
+    
+    // Configure remote control
+    "ENABLE_REMOTE_CONTROL": false,
+    
+    // Configure dial in features
+    "dialInEnabled": false,
+    
+    // Configure sharing features
+    "SHARING_FEATURES": [
+        "email",
+        "iframe",
+        "link"
+    ]
+}
