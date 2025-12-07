@@ -1,0 +1,118 @@
+version: '3.8'
+
+services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: elite_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootpassword}
+      MYSQL_DATABASE: ${DB_NAME:-skcooly_db}
+      MYSQL_USER: ${DB_USERNAME:-elite_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-elite_password}
+    ports:
+      - "${DB_PORT:-3306}:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./sql:/docker-entrypoint-initdb.d
+    networks:
+      - elite_network
+    command: --default-authentication-plugin=mysql_native_password
+
+  # Redis (optional for caching and sessions)
+  redis:
+    image: redis:7-alpine
+    container_name: elite_redis
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - elite_network
+
+  # Elite Scholar Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: elite_app
+    restart: unless-stopped
+    ports:
+      - "${PORT:-34567}:34567"
+    environment:
+      # Database
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_NAME: ${DB_NAME:-skcooly_db}
+      DB_USERNAME: ${DB_USERNAME:-elite_user}
+      DB_PASSWORD: ${DB_PASSWORD:-elite_password}
+      
+      # Server
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: 34567
+      
+      # JWT
+      JWT_SECRET: ${JWT_SECRET:-your-super-secret-jwt-key-change-in-production}
+      PASSPORT_SECRET: ${PASSPORT_SECRET:-your-passport-secret}
+      
+      # Cloudinary
+      CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME}
+      CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY}
+      CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET}
+      
+      # Audio Upload
+      MAX_AUDIO_SIZE: ${MAX_AUDIO_SIZE:-6291456}
+      
+      # Redis (optional)
+      REDIS_URL: redis://redis:6379
+      
+      # Logging
+      ENABLE_LOGGING: ${ENABLE_LOGGING:-true}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      ENABLE_DB_LOGGING: ${ENABLE_DB_LOGGING:-false}
+    volumes:
+      - app_uploads:/app/backend/uploads
+      - app_logs:/app/backend/logs
+    depends_on:
+      - mysql
+      - redis
+    networks:
+      - elite_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:34567/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Nginx (optional reverse proxy)
+  nginx:
+    image: nginx:alpine
+    container_name: elite_nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - app
+    networks:
+      - elite_network
+
+volumes:
+  mysql_data:
+    driver: local
+  redis_data:
+    driver: local
+  app_uploads:
+    driver: local
+  app_logs:
+    driver: local
+
+networks:
+  elite_network:
+    driver: bridge
