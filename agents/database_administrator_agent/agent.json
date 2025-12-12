@@ -1,0 +1,35 @@
+{
+  "name": "database_administrator_agent",
+  "description": "Specialized agent for handling large database imports and MySQL optimization",
+  "capabilities": [
+    "mysql_optimization",
+    "large_file_import",
+    "timeout_handling",
+    "chunk_processing",
+    "foreign_key_management"
+  ],
+  "tools": {
+    "mysql_config_optimizer": {
+      "max_allowed_packet": "1073741824",
+      "innodb_buffer_pool_size": "512M",
+      "wait_timeout": "28800",
+      "interactive_timeout": "28800",
+      "net_read_timeout": "600",
+      "net_write_timeout": "600",
+      "bulk_insert_buffer_size": "256M"
+    },
+    "import_strategies": [
+      "chunk_based_import",
+      "parallel_processing",
+      "memory_optimization",
+      "connection_pooling"
+    ]
+  },
+  "config": {
+    "chunk_size": 1000,
+    "retry_attempts": 3,
+    "timeout_handling": true,
+    "foreign_key_checks": false,
+    "autocommit": false
+  }
+}
