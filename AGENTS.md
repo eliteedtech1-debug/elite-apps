@@ -1,261 +1,525 @@
-# Repository Guidelines
+# AI Agent Configuration for Elite Scholar
 
-## Project Structure & Module Organization
+> **Optimized for:** Anthropic Claude (Primary) | OpenCode (Secondary) | Google Gemini (Tertiary)
+> 
+> **Last Updated:** 2025-12-13
 
-Elite Scholar is organized as a dual-repository system with clear separation of concerns:
+---
 
-- **elscholar-api/**: Node.js/Express backend API with comprehensive logging, authentication, and database management
-- **elscholar-ui/**: React/TypeScript frontend with Vite build system and modern UI components
-- **src/**: Main application code for both repositories
-- **docs/**: Extensive documentation including setup guides, API documentation, and system architecture
-- **logs/**: Comprehensive logging system with categorized log files (queries, processes, errors, performance)
+## 🤖 Agent Roster
 
-## Build, Test, and Development Commands
+### 1. **Frontend Expert**
+**Role:** React/TypeScript UI Development Specialist
 
+**Responsibilities:**
+- React component development and optimization
+- TypeScript type safety and interface design
+- Ant Design UI component integration
+- Redux Toolkit state management
+- Vite build configuration and optimization
+- Responsive design and accessibility
+
+**Key Areas:**
+- `elscholar-ui/src/feature-module/` - All feature components
+- `elscholar-ui/src/redux/` - State management
+- `elscholar-ui/vite.config.js` - Build configuration
+- React Router configuration and navigation
+
+**Commands to Know:**
 ```bash
-# Backend (elscholar-api)
+cd elscholar-ui
+npm start          # Dev server (port 3000)
+npm run build      # Production build
+npm run build:craco # Build with increased memory
+```
+
+**Coding Standards:**
+- 2-space indentation
+- camelCase for components
+- TypeScript strict mode
+- Ant Design component patterns
+- No comments unless explicitly requested
+
+---
+
+### 2. **Backend Expert**
+**Role:** Node.js/Express API Development Specialist
+
+**Responsibilities:**
+- Express.js route and controller development
+- Sequelize ORM model management
+- Business logic implementation
+- API endpoint design and optimization
+- Middleware development (auth, validation, logging)
+- Error handling and response formatting
+
+**Key Areas:**
+- `elscholar-api/src/controllers/` - Business logic
+- `elscholar-api/src/routes/` - API endpoints
+- `elscholar-api/src/middleware/` - Request processing
+- `elscholar-api/src/services/` - Business services
+
+**Commands to Know:**
+```bash
+cd elscholar-api
+npm run dev        # Development with nodemon
+npm start          # Production server
+npm run build-server # Babel transpilation
+```
+
+**Coding Standards:**
+- 2-space indentation
+- camelCase for functions/variables
+- Comprehensive error handling
+- Structured JSON responses
+- Audit trail logging
+
+---
+
+### 3. **DBA Expert**
+**Role:** MySQL Database & Sequelize ORM Specialist
+
+**Responsibilities:**
+- Database schema design and optimization
+- Stored procedure development and maintenance
+- Sequelize model definition and relationships
+- Migration script creation
+- Query optimization and indexing
+- Data integrity and constraint management
+
+**Key Areas:**
+- `elscholar-api/src/models/` - Sequelize models
+- Stored procedures in MySQL
+- Database migrations
+- Connection pooling configuration
+
+**Database Standards:**
+- snake_case for tables and columns
+- Parameterized queries (SQL injection prevention)
+- Stored procedures for complex operations
+- Connection pool: max 20, min 2
+- Slow query threshold: >1000ms
+
+**Critical Notes:**
+- Multi-tenant isolation (school_id, branch_id)
+- Audit trail requirements for financial data
+- Comprehensive logging for all queries
+
+---
+
+### 4. **Finance Expert**
+**Role:** Financial Systems & Accounting Specialist
+
+**Responsibilities:**
+- Payment processing logic
+- Billing and invoicing systems
+- Accounting compliance implementation
+- Financial reporting and analytics
+- Journal entry automation
+- Audit trail maintenance
+
+**Key Areas:**
+- Payment processing workflows
+- `payment_entries` table operations
+- `journal_entries` and accounting compliance
+- Fee structure management
+- Receipt generation
+
+**Financial Workflows:**
+1. Bill Generation → Fee structures + custom charges
+2. Payment Collection → Transaction logging
+3. Accounting Integration → Journal entries
+4. Receipt Generation → PDF with audit trail
+
+**Code Path:**
+```
+PaymentsOrmController.createPayment 
+  → payment_entries 
+  → journal_entries 
+  → accounting_compliance
+```
+
+---
+
+### 5. **Security Expert**
+**Role:** Authentication, Authorization & Security Specialist
+
+**Responsibilities:**
+- JWT authentication implementation
+- Role-based access control (RBAC)
+- Password security and validation
+- Multi-tenant data isolation
+- CORS and security middleware
+- Audit trail and compliance
+
+**Key Areas:**
+- `elscholar-api/src/middleware/auth.js` - Authentication
+- Passport.js JWT strategy
+- User role management
+- Session security
+
+**Security Standards:**
+- JWT stateless authentication
+- Bcrypt password hashing
+- Role levels: admin, teacher, student, parent
+- School/branch isolation
+- SQL injection prevention via ORM
+- Comprehensive input validation
+
+---
+
+### 6. **QA Expert**
+**Role:** Quality Assurance & Testing Specialist
+
+**Responsibilities:**
+- Test strategy development
+- API endpoint testing
+- UI component testing
+- Integration testing
+- Performance testing
+- Bug identification and reproduction
+
+**Testing Tools:**
+- Manual testing via `PaymentAPITester.tsx`
+- Debug routes for database testing
+- Browser DevTools for frontend
+- Postman/curl for API testing
+
+**Testing Checklist:**
+- Authentication flows
+- Multi-tenant data isolation
+- Financial transaction accuracy
+- UI responsiveness
+- Error handling
+- Performance benchmarks
+
+---
+
+### 7. **DevOps Expert**
+**Role:** Deployment, Infrastructure & Performance Specialist
+
+**Responsibilities:**
+- Build and deployment configuration
+- Environment management
+- Performance optimization
+- Logging and monitoring setup
+- Database connection management
+- Server configuration
+
+**Key Areas:**
+- Build configurations (Vite, Babel)
+- Environment variables
+- Logging system (`logs/` directory)
+- Connection pooling
+- Health check endpoints
+
+**Performance Monitoring:**
+- Query logging with slow query detection
+- Categorized logs: queries, processes, errors, performance
+- Health checks and system monitoring
+- Error tracking with stack traces
+
+---
+
+### 8. **Project Manager**
+**Role:** Coordination, Planning & Documentation Specialist
+
+**Responsibilities:**
+- Feature planning and breakdown
+- Task prioritization and tracking
+- Documentation maintenance
+- Cross-agent coordination
+- Progress reporting
+- Risk assessment
+
+**Documentation Areas:**
+- Architecture documentation
+- API documentation
+- Setup guides
+- Workflow documentation
+- Change logs
+
+**Project Standards:**
+- Branch: `expirement`
+- Descriptive commits
+- Feature-specific changes
+- Documentation updates with architectural changes
+
+---
+
+### 9. **Academic Systems Expert**
+**Role:** Educational Features & Academic Management Specialist
+
+**Responsibilities:**
+- Student enrollment systems
+- Class and subject management
+- Assessment and grading systems
+- Virtual classroom features
+- Timetable generation
+- Academic reporting
+
+**Key Areas:**
+- Student enrollment workflows
+- Class management
+- Assessment systems
+- Academic tracking
+- Parent communication
+
+**Academic Workflows:**
+```
+Registration → Validation → Billing Setup → Account Creation
+auth/register → StudentController.createStudent → payment_entries → user_accounts
+```
+
+---
+
+### 10. **Integration Expert**
+**Role:** External Services & API Integration Specialist
+
+**Responsibilities:**
+- Third-party API integration
+- Cloudinary image upload
+- Payment gateway integration
+- SMS service integration
+- Email/SMTP configuration
+- Redis queue management
+
+**External Services:**
+- **Required:** MySQL, SMTP
+- **Optional:** Redis, Cloudinary, Payment Gateways, SMS Services
+
+**Environment Variables:**
+```bash
+CLOUDINARY_URL=    # Image uploads
+REDIS_URL=         # Queue management
+# Payment gateway configs
+# SMS service configs
+```
+
+---
+
+## 🎯 Agent Collaboration Guidelines
+
+### Multi-Agent Workflows
+
+**Feature Development:**
+1. **Project Manager** - Break down feature requirements
+2. **Frontend Expert** + **Backend Expert** - Implement UI and API
+3. **DBA Expert** - Database schema changes
+4. **Security Expert** - Review security implications
+5. **QA Expert** - Test implementation
+6. **DevOps Expert** - Deploy and monitor
+
+**Bug Fixes:**
+1. **QA Expert** - Reproduce and document bug
+2. **Relevant Expert** - Implement fix
+3. **Security Expert** - Security review (if applicable)
+4. **QA Expert** - Verify fix
+5. **Project Manager** - Document resolution
+
+**Database Changes:**
+1. **DBA Expert** - Schema design
+2. **Backend Expert** - ORM model updates
+3. **Finance Expert** - Financial impact review (if applicable)
+4. **QA Expert** - Test data integrity
+5. **DevOps Expert** - Migration deployment
+
+---
+
+## 🔧 Universal Agent Guidelines
+
+### Coding Standards (All Agents)
+
+**Indentation:** 2 spaces (no tabs)
+
+**Naming Conventions:**
+- **Files:** camelCase (components), kebab-case (routes/utilities)
+- **Functions/Variables:** camelCase with descriptive names
+- **Database:** snake_case for tables and columns
+- **Constants:** UPPER_SNAKE_CASE
+
+**Critical Syntax Rules:**
+- Use `\n` for newlines in strings (NOT literal newlines)
+- Use `\"` for escaped quotes (NOT unescaped quotes)
+- Always validate string literals for proper escaping
+- Example: `let csv = 'Header\n';` NOT `let csv = 'Header\n';`
+
+**Comments:**
+- Do NOT add comments unless explicitly requested
+- Code should be self-documenting
+
+---
+
+## 📋 Project Context (All Agents)
+
+### System Architecture
+```
+[Users] → [React UI (Vite)] → [Express API] → [MySQL + Stored Procedures]
+            ↓                      ↓
+      [Ant Design]          [Sequelize ORM]
+            ↓                      ↓
+      [Redux Store]         [Audit Logging]
+```
+
+### Technology Stack
+- **Frontend:** React 18, TypeScript, Ant Design, Redux Toolkit, Vite
+- **Backend:** Node.js 18+, Express.js, Sequelize ORM, Passport.js
+- **Database:** MySQL 8.0+, Stored Procedures
+- **Tools:** Nodemon, ESLint, Babel
+
+### Key Responsibilities
+- Student enrollment, billing, academic tracking
+- Teacher and staff management with payroll
+- Financial management with accounting compliance
+- Academic management with virtual classrooms
+- Multi-tenant architecture (school/branch isolation)
+
+---
+
+## 🚀 Quick Start Commands
+
+### Backend (elscholar-api)
+```bash
 npm install          # Install dependencies
-npm run dev          # Start development server with nodemon
-npm start           # Start production server
-npm run build-server # Build with Babel transpilation
-
-# Frontend (elscholar-ui)
-npm install         # Install dependencies
-npm start          # Start Vite development server (port 3000)
-npm run build      # Build for production with Vite
-npm run build:craco # Alternative build with increased memory
+npm run dev          # Development server with nodemon
+npm start            # Production server
+npm run build-server # Babel transpilation
 ```
 
-## Coding Style & Naming Conventions
-
-- **Indentation**: 2 spaces (configured in package.json and vite.config.js)
-- **File naming**: camelCase for components, kebab-case for routes and utilities
-- **Function/variable naming**: camelCase with descriptive names (e.g., `authenticateToken`, `getStudentBillingDetails`)
-- **Database naming**: snake_case for tables and columns (e.g., `payment_entries`, `school_id`)
-- **Linting**: ESLint configuration with React and TypeScript rules
-- **⚠️ IMPORTANT SYNTAX NOTE**: Be extremely careful with escape sequences in code:
-  - Use `\n` for actual newlines in strings (not `
-` which breaks syntax)
-  - Use `\"` for escaped quotes in strings (not `"` which terminates strings prematurely)
-  - Always validate string literals for proper escaping before committing
-  - Example: `let csv = 'Header\n';` not `let csv = 'Header
-';`
-
-## Testing Guidelines
-
-- **Framework**: No specific testing framework detected in current configuration
-- **API Testing**: Manual testing tools available in `src/feature-module/management/feescollection/PaymentAPITester.tsx`
-- **Database Testing**: Debug routes available for testing database connections and queries
-- **Environment**: Separate development and production configurations
-
-## Commit & Pull Request Guidelines
-
-- **Current branch**: Both repositories are on `expirement` branch
-- **Commit pattern**: Descriptive commits with feature-specific changes
-- **File organization**: Maintain separation between API and UI repositories
-- **Documentation**: Update relevant documentation when making architectural changes
-
----
-
-# Repository Tour
-
-## 🎯 What This Repository Does
-
-Elite Scholar is a comprehensive school management system designed for educational institutions. It provides a complete solution for managing students, teachers, academic programs, financial operations, and administrative tasks through a modern web-based platform.
-
-**Key responsibilities:**
-- Student enrollment, billing, and academic tracking
-- Teacher and staff management with payroll integration
-- Financial management including payments, accounting, and reporting
-- Academic management with virtual classrooms and assessment systems
-
----
-
-## 🏗️ Architecture Overview
-
-### System Context
-```
-[Students/Teachers/Admin] → [Elite Scholar UI (React)] → [Elite Scholar API (Node.js)] → [MySQL Database]
-                                     ↓                            ↓
-                              [Ant Design UI]              [Sequelize ORM]
-                                     ↓                            ↓
-                              [Redux Store]               [Stored Procedures]
-```
-
-### Key Components
-- **Authentication Service** - JWT-based authentication with Passport.js, role-based access control
-- **Student Management** - Enrollment, billing, academic tracking, and parent communication
-- **Financial System** - Payment processing, accounting compliance, financial reporting with audit trails
-- **Academic Engine** - Class management, assessments, virtual classrooms, and timetable generation
-- **Notification System** - Real-time notifications, support tickets, and communication tools
-
-### Data Flow
-1. **User Authentication** - JWT tokens validated through Passport.js middleware
-2. **Request Processing** - Express.js routes with comprehensive logging and validation
-3. **Database Operations** - Sequelize ORM with MySQL, extensive stored procedure usage
-4. **Response Formatting** - Structured JSON responses with error handling and audit trails
-
----
-
-## 📁 Project Structure [Partial Directory Tree]
-
-```
-elite/
-├── elscholar-api/                  # Backend Node.js API
-│   ├── src/
-│   │   ├── controllers/            # Business logic controllers
-│   │   ├── models/                 # Sequelize ORM models
-│   │   ├── routes/                 # Express.js route definitions
-│   │   ├── middleware/             # Authentication, CORS, security middleware
-│   │   ├── services/               # Business services and utilities
-│   │   ├── logging/                # Comprehensive logging system
-│   │   └── config/                 # Database and application configuration
-│   ├── logs/                       # Categorized log files (queries, errors, performance)
-│   ├── docs/                       # API documentation and setup guides
-│   └── package.json                # Dependencies and scripts
-├── elscholar-ui/                   # Frontend React application
-│   ├── src/
-│   │   ├── feature-module/         # Feature-based component organization
-│   │   │   ├── academic/           # Academic management components
-│   │   │   ├── management/         # Administrative management
-│   │   │   ├── auth/               # Authentication components
-│   │   │   ├── Utils/              # Shared utilities and helpers
-│   │   │   └── router/             # React Router configuration
-│   │   ├── redux/                  # Redux Toolkit store configuration
-│   │   └── services/               # API services and utilities
-│   ├── dist/                       # Vite build output
-│   ├── docs/                       # Frontend documentation
-│   ├── vite.config.js              # Vite build configuration
-│   └── package.json                # Dependencies and scripts
-```
-
-### Key Files to Know
-
-| File | Purpose | When You'd Touch It |
-|------|---------|---------------------|
-| `elscholar-api/src/index.js` | Main API server entry point | Server configuration changes |
-| `elscholar-api/src/models/index.js` | Database connection and ORM setup | Database configuration |
-| `elscholar-ui/vite.config.js` | Frontend build configuration | Build optimization, proxy setup |
-| `elscholar-ui/src/feature-module/router/` | React routing configuration | Adding new routes |
-| `elscholar-api/src/middleware/auth.js` | Authentication middleware | Security policy changes |
-
----
-
-## 🔧 Technology Stack
-
-### Core Technologies
-- **Backend Language:** Node.js (v18+) - Chosen for JavaScript ecosystem consistency and npm package availability
-- **Backend Framework:** Express.js - Lightweight, flexible web framework with extensive middleware ecosystem
-- **Frontend Framework:** React 18 with TypeScript - Modern UI development with type safety
-- **Database:** MySQL 8.0+ with Sequelize ORM - Relational database with comprehensive stored procedure support
-- **Build Tool:** Vite - Fast development server and optimized production builds
-
-### Key Libraries
-- **Sequelize ORM** - Database abstraction with migration support and relationship management
-- **Passport.js** - Authentication middleware with JWT strategy implementation
-- **Ant Design** - Professional React UI component library for consistent design
-- **Redux Toolkit** - State management with modern Redux patterns
-- **React Router** - Client-side routing with history API support
-
-### Development Tools
-- **Nodemon** - Development server with automatic restart on file changes
-- **ESLint** - Code linting with React and TypeScript rules
-- **Babel** - JavaScript transpilation for broader browser compatibility
-
----
-
-## 🌐 External Dependencies
-
-### Required Services
-- **MySQL Database** - Primary data storage with stored procedures for complex business logic
-- **Redis (Optional)** - Queue management for background processing and caching
-- **SMTP Server** - Email notifications and communication features
-
-### Optional Integrations
-- **Cloudinary** - Image and file upload management with CDN delivery
-- **Payment Gateways** - Financial transaction processing (configurable)
-- **SMS Services** - Mobile notifications and alerts
-
-### Environment Variables
-
+### Frontend (elscholar-ui)
 ```bash
-# Database Configuration
-DB_HOST=localhost
-DB_PORT=3306
-DB_NAME=skcooly_db
-DB_USERNAME=root
-DB_PASSWORD=
-
-# Server Configuration
-PORT=34567                    # API server port
-NODE_ENV=development         # Environment mode
-
-# Authentication
-JWT_SECRET=your_jwt_secret   # JWT token signing secret
-PASSPORT_SECRET=your_secret  # Passport session secret
-
-# Logging
-ENABLE_LOGGING=true          # Enable comprehensive logging
-LOG_LEVEL=DEBUG             # Logging verbosity level
-ENABLE_DB_LOGGING=true      # Database query logging
-
-# Optional Services
-CLOUDINARY_URL=             # Image upload service
-REDIS_URL=                  # Queue management
+npm install         # Install dependencies
+npm start           # Vite dev server (port 3000)
+npm run build       # Production build
+npm run build:craco # Build with increased memory
 ```
 
 ---
 
-## 🔄 Common Workflows
+## 🔐 Security Requirements (All Agents)
 
-### Student Enrollment Workflow
-1. **Registration** - Student data entry through admin interface or online forms
-2. **Validation** - Data validation and duplicate checking via stored procedures
-3. **Billing Setup** - Automatic fee structure assignment based on class and school policies
-4. **Account Creation** - User account generation with role-based permissions
-
-**Code path:** `auth/register` → `StudentController.createStudent` → `payment_entries` table → `user_accounts` table
-
-### Payment Processing Workflow
-1. **Bill Generation** - Automated billing based on fee structures and custom charges
-2. **Payment Collection** - Multiple payment methods with transaction logging
-3. **Accounting Integration** - Automatic journal entry creation for financial compliance
-4. **Receipt Generation** - PDF receipt generation with audit trail
-
-**Code path:** `PaymentsOrmController.createPayment` → `payment_entries` → `journal_entries` → `accounting_compliance`
-
----
-
-## 📈 Performance & Scale
-
-### Performance Considerations
-- **Database Optimization** - Extensive use of stored procedures for complex operations, optimized indexes
-- **Connection Pooling** - Sequelize connection pool (max: 20, min: 2 connections)
-- **Query Logging** - Comprehensive SQL query logging with slow query detection (>1000ms threshold)
-
-### Monitoring
-- **Comprehensive Logging** - Categorized logs for queries, processes, errors, and performance metrics
-- **Health Checks** - Database connectivity monitoring and system health endpoints
-- **Error Tracking** - Detailed error logging with stack traces and context information
-
----
-
-## 🚨 Security Considerations
-
-### 🔒 Authentication & Authorization
-- **JWT Authentication** - Stateless token-based authentication with configurable expiration
-- **Role-Based Access** - Multi-level permissions (admin, teacher, student, parent) with school/branch isolation
-- **Password Security** - Bcrypt hashing with comprehensive password validation and history tracking
+### Authentication
+- JWT stateless tokens
+- Passport.js middleware
+- Role-based access control
 
 ### Data Protection
-- **SQL Injection Prevention** - Sequelize ORM with parameterized queries and stored procedures
-- **CORS Configuration** - Proper cross-origin resource sharing with header injection middleware
-- **Input Validation** - Comprehensive request validation and sanitization
-- **Audit Trails** - Complete transaction logging for financial compliance and security monitoring
+- SQL injection prevention (Sequelize ORM)
+- Input validation and sanitization
+- CORS configuration
+- Audit trails for financial data
 
-### Multi-Tenant Security
-- **School Isolation** - Database-level separation ensuring schools cannot access each other's data
-- **Branch-Level Access** - Granular permissions within school hierarchies
-- **Session Management** - Secure session handling with automatic cleanup and monitoring
+### Multi-Tenant Isolation
+- School-level data separation
+- Branch-level permissions
+- Session security
 
-*Updated at: 2024-12-20 UTC*
+---
+
+## 📊 Performance Standards (All Agents)
+
+### Database
+- Connection pool: max 20, min 2
+- Slow query threshold: >1000ms
+- Stored procedures for complex operations
+- Optimized indexes
+
+### Logging
+- Comprehensive categorized logs
+- Query logging with performance metrics
+- Error tracking with stack traces
+- Health check endpoints
+
+---
+
+## 🤝 AI Platform Compatibility
+
+### Anthropic Claude (Primary)
+- Optimized for detailed context understanding
+- Best for complex multi-step reasoning
+- Excellent code generation and refactoring
+- Strong security and compliance awareness
+
+### OpenCode (Secondary)
+- Optimized for rapid code iteration
+- Best for focused code changes
+- Excellent file navigation
+- Strong debugging capabilities
+
+### Google Gemini (Tertiary)
+- Optimized for broad context analysis
+- Best for architectural decisions
+- Excellent documentation generation
+- Strong pattern recognition
+
+---
+
+## 📝 Agent Invocation Examples
+
+### For Claude/Gemini:
+```
+"Frontend Expert: Add a new student enrollment form component with validation"
+"DBA Expert: Create a stored procedure for attendance calculation"
+"Finance Expert: Review the payment processing logic for compliance"
+"Security Expert: Audit the authentication middleware for vulnerabilities"
+```
+
+### For OpenCode:
+```
+@Frontend-Expert fix the student list pagination
+@Backend-Expert optimize the payment query performance
+@DBA-Expert add index to payment_entries table
+@QA-Expert test the new billing feature
+```
+
+---
+
+## 🎓 Domain-Specific Knowledge
+
+### Financial Terms
+- **Payment Entry:** Transaction record in `payment_entries`
+- **Journal Entry:** Accounting record in `journal_entries`
+- **Accounting Compliance:** Audit trail and financial reporting
+- **Fee Structure:** Billing template per class/school
+
+### Academic Terms
+- **Enrollment:** Student registration process
+- **Class:** Academic group/grade level
+- **Branch:** School location/campus
+- **Assessment:** Test/exam/evaluation
+- **Virtual Classroom:** Online learning environment
+
+### Technical Terms
+- **Multi-Tenant:** Multiple schools in single database
+- **Stored Procedure:** MySQL server-side function
+- **ORM:** Object-Relational Mapping (Sequelize)
+- **JWT:** JSON Web Token for authentication
+- **RBAC:** Role-Based Access Control
+
+---
+
+## 📌 Important Notes
+
+### Branch Information
+- **Current Branch:** `expirement`
+- **Commit Style:** Descriptive, feature-specific
+- **Documentation:** Update with architectural changes
+
+### Environment
+- **API Port:** 34567
+- **UI Port:** 3000
+- **Database:** skcooly_db
+- **Node Version:** 18+
+
+### Critical Reminders
+1. **No comments** unless requested
+2. **Escape sequences** must be correct (`\n` not literal newlines)
+3. **Multi-tenant isolation** is mandatory
+4. **Audit trails** required for financial operations
+5. **Security review** for authentication changes
+
+---
+
+*Last Updated: 2025-12-13*
+*Version: 2.0 - Generic Agent Names*
+*Compatible with: Claude, OpenCode, Gemini*
