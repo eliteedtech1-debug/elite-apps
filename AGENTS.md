@@ -523,3 +523,48 @@ npm run build:craco # Build with increased memory
 *Last Updated: 2025-12-13*
 *Version: 2.0 - Generic Agent Names*
 *Compatible with: Claude, OpenCode, Gemini*
+
+
+---
+
+## 🔐 Active Project: RBAC System Upgrade
+
+### Project Overview
+Restructuring the Role-Based Access Control system to remove legacy `users.accessTo` and `users.permissions` fields, implement hierarchical permissions, and enable dynamic sidebar generation.
+
+### Implementation Documents
+Located in: `/agents/rbac-implementation/`
+
+| Document | Agent | Description |
+|----------|-------|-------------|
+| `README.md` | All | Project overview |
+| `phase1-database.md` | DBA Expert | Database schema tasks |
+| `phase2-backend.md` | Backend Expert | API service tasks |
+| `phase3-frontend.md` | Frontend Expert | React component tasks |
+| `phase4-testing.md` | QA Expert | Testing strategy |
+| `phase5-deployment.md` | DevOps Expert | Infrastructure tasks |
+| `timeline.md` | Project Manager | Coordination |
+
+### How to Use with Claude CLI
+```bash
+# Start with analysis
+q chat --context /RBAC_ANALYSIS.md
+
+# Then execute phases
+q chat --context /agents/rbac-implementation/phase1-database.md
+# Invoke: "DBA Expert: Execute all tasks in this document"
+
+q chat --context /agents/rbac-implementation/phase2-backend.md
+# Invoke: "Backend Expert: Execute all tasks in this document"
+```
+
+### Key Deliverables
+1. New RBAC tables (superadmin_features, staff_roles, etc.)
+2. rbacService.js with permission resolution
+3. Dynamic sidebar from database
+4. Permission caching with Redis
+5. Comprehensive test suite
+
+---
+
+*RBAC Project Added: 2025-12-21*
