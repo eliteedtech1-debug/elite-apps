@@ -1,0 +1,278 @@
+[
+  {
+    "name": "Personal Data Mngr",
+    "requiredAccess": ["admin", "branchadmin"],
+    "items": [
+      {
+        "key": "STUDENTS",
+        "label": "Students",
+        "icon": "ti ti-school",
+        "feature": "students",
+        "requiredAccess": ["admin", "branchadmin", "superadmin"],
+        "submenu": true,
+        "submenuItems": [
+          {"label": "Student List", "link": "/student/student-list"},
+          {"label": "Class List", "link": "/academic/class-list"},
+          {"label": "Promotion & Graduation", "link": "/students/promotion"}
+        ]
+      },
+      {
+        "key": "STAFF",
+        "label": "Staff",
+        "icon": "ti ti-users",
+        "feature": "teachers",
+        "requiredAccess": ["admin", "branchadmin", "superadmin"],
+        "submenu": true,
+        "submenuItems": [
+          {"label": "Staff List", "link": "/teacher/teacher-list"}
+        ]
+      },
+      {
+        "key": "PARENTS",
+        "label": "Parents",
+        "icon": "ti ti-users",
+        "feature": "parents",
+        "requiredAccess": ["admin", "branchadmin"],
+        "submenu": true,
+        "submenuItems": [
+          {"label": "Parent List", "link": "/parents/parent-list"}
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Attendance",
+    "requiredAccess": ["admin", "branchadmin"],
+    "items": [
+      {
+        "key": "STUDENT_ATTENDANCE",
+        "label": "Student Attendance",
+        "icon": "ti ti-school",
+        "requiredAccess": ["admin", "branchadmin"],
+        "submenu": true,
+        "submenuItems": [
+          {"label": "Student Reports", "link": "/attendance/dashboard"},
+          {"label": "Take Attendance", "link": "/academic/attendance-register"}
+        ]
+      },
+      {
+        "key": "STAFF_ATTENDANCE",
+        "label": "Staff Attendance",
+        "icon": "ti ti-id-badge",
+        "premium": true,
+        "requiredAccess": ["admin", "branchadmin"],
+        "submenu": true,
+        "submenuItems": [
+          {"label": "Staff Attendance", "link": "/hrm/staff-attendance"},
+          {"label": "Staff Report", "link": "/hrm/staff-attendance-overview"}
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Academic",
+    "requiredAccess": ["admin", "branchadmin", "superadmin"],
+    "items": [
+      {
+        "key": "CLASS_MANAGEMENT",
+        "label": "Classes",
+        "link": "/academic/class-list",
+        "feature": "classes",
+        "requiredAccess": ["admin", "branchadmin"]
+      },
+      {
+        "key": "SUBJECTS",
+        "label": "Subjects",
+        "link": "/academic/subjects",
+        "feature": "classes",
+        "requiredAccess": ["admin", "branchadmin"]
+      },
+      {
+        "key": "TIMETABLE",
+        "label": "Timetable",
+        "link": "/simple-timetable",
+        "feature": "classes",
+        "requiredAccess": ["admin", "branchadmin"]
+      },
+      {
+        "key": "VIRTUAL_CLASS",
+        "label": "Virtual Class",
+        "link": "/application/video-call",
+        "premium": true,
+        "requiredAccess": ["admin", "branchadmin"]
+      },
+      {
+        "key": "EXAMINATIONS",
+        "label": "Examinations",
+        "icon": "ti ti-certificate",
+        "feature": "exams",
+        "requiredAccess": ["admin", "branchadmin", "teacher", "exam_officer"],
+        "submenu": true,
+        "submenuItems": [
+          {"label": "Assessment Form", "link": "/academic/assessments"},
+          {"label": "FormMaster Review", "link": "/academic/formmaster-score-sheet"},
+          {"label": "Reports Generator", "link": "/report/exams/generate-report"},
+          {"label": "Broad Sheet", "link": "/academic/broad-sheet"},
+          {"label": "CA Setup", "link": "/academic/ca-setup"},
+          {"label": "Report Template", "link": "/academic/report-configuration"},
+          {"label": "Exam Analytics", "link": "/academic/exam-analytics", "premium": true},
+          {"label": "Submit Questions", "link": "/examinations/submit-questions", "premium": true},
+          {"label": "Moderation", "link": "/examinations/moderation", "premium": true},
+          {"label": "Print Questions", "link": "/examinations/print-questions", "premium": true},
+          {"label": "Progress Tracking", "link": "/examinations/progress", "premium": true}
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Express Finance",
+    "requiredAccess": ["admin", "branchadmin"],
+    "items": [
+      {
+        "key": "FINANCE_REPORT",
+        "label": "Finance Report",
+        "link": "/management/finance/report",
+        "feature": "fees",
+        "requiredAccess": ["admin", "branchadmin"]
+      },
+      {
+        "key": "BANK_ACCOUNTS",
+        "label": "Bank Accounts",
+        "link": "/management/finance/bank-accounts",
+        "requiredAccess": ["admin", "branchadmin"]
+      },
+      {
+        "key": "SCHOOL_FEES",
+        "label": "School Fees",
+        "icon": "ti ti-coin",
+        "feature": "fees",
+        "requiredAccess": ["admin", "branchadmin"],
+        "submenu": true,
+        "submenuItems": [
+          {"label": "Fees Setup", "link": "/management/student-fees"},
+          {"label": "Single Billing", "link": "/management/collect-fees"},
+          {"label": "Single Payments", "link": "/management/receipt-classes"},
+          {"label": "Family Billing", "link": "/management/family-billing"},
+          {"label": "Family Payments", "link": "/parent/parentpayments"}
+        ]
+      },
+      {
+        "key": "INCOME_EXPENSES",
+        "label": "Income & Expenses",
+        "icon": "ti ti-coin",
+        "requiredAccess": ["admin", "branchadmin"],
+        "submenu": true,
+        "submenuItems": [
+          {"label": "Income Reports", "link": "/accounts/income-report"},
+          {"label": "Expenses Reports", "link": "/accounts/expesnes/new"},
+          {"label": "Profit and Loss", "link": "/accounts/profit/report"}
+        ]
+      },
+      {
+        "key": "PAYROLL",
+        "label": "Payroll",
+        "icon": "ti ti-briefcase",
+        "feature": "payroll",
+        "elite": true,
+        "requiredAccess": ["admin", "branchadmin"],
+        "submenu": true,
+        "submenuItems": [
+          {"label": "Staff Management", "link": "/payroll/staff-payroll"},
+          {"label": "Salary Structure", "link": "/payroll/structure"},
+          {"label": "Allowance & Deductions", "link": "/payrol/Allowances/deductions"},
+          {"label": "Loan Management", "link": "/payroll/loan-management"},
+          {"label": "Salary Disbursement", "link": "/payroll/salary-disbursement"},
+          {"label": "Salary Report", "link": "/payroll/salary-report"}
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Asset & Supply Mngr",
+    "elite": true,
+    "feature": "assets",
+    "requiredAccess": ["admin", "branchadmin"],
+    "items": [
+      {
+        "key": "ASSET_MANAGEMENT",
+        "label": "Asset Management",
+        "icon": "ti ti-building",
+        "feature": "assets",
+        "elite": true,
+        "requiredAccess": ["admin", "branchadmin"],
+        "submenu": true,
+        "submenuItems": [
+          {"label": "Dashboard", "link": "/supply-management/asset/dashboard"},
+          {"label": "Asset Inventory", "link": "/supply-management/asset/inventory"},
+          {"label": "Categories", "link": "/supply-management/asset/categories"},
+          {"label": "Facility Rooms", "link": "/supply-management/asset/facility-rooms"}
+        ]
+      },
+      {
+        "key": "INVENTORY_MANAGEMENT",
+        "label": "Inventory & Supply",
+        "icon": "ti ti-package",
+        "feature": "assets",
+        "elite": true,
+        "requiredAccess": ["admin", "branchadmin"],
+        "submenu": true,
+        "submenuItems": [
+          {"label": "Dashboard", "link": "/supply-management/inventory/dashboard"},
+          {"label": "Product Catalog", "link": "/supply-management/inventory/products"},
+          {"label": "Stock Management", "link": "/supply-management/inventory/stock"},
+          {"label": "Purchase Orders", "link": "/supply-management/inventory/purchase-orders"},
+          {"label": "Suppliers", "link": "/supply-management/inventory/suppliers"}
+        ]
+      }
+    ]
+  },
+  {
+    "name": "General Setups",
+    "requiredAccess": ["admin", "branchadmin", "superadmin"],
+    "items": [
+      {
+        "key": "SCHOOL_SETUP",
+        "label": "School Setup",
+        "icon": "fa fa-gears",
+        "requiredAccess": ["admin", "branchadmin"],
+        "submenu": true,
+        "submenuItems": [
+          {"label": "Academic Calendar", "link": "/school-setup/academic-year-setup"},
+          {"label": "Report Sheet Config", "link": "/academic-settings/end-of-term-report-config"},
+          {"label": "Religion Setup", "link": "/academic-settings/religion"},
+          {"label": "School Branches", "link": "/school-setup/branches"},
+          {"label": "School Sections", "link": "/school-setup/section-form"},
+          {"label": "Classes Setup", "link": "/academic/classes-setup"},
+          {"label": "Subjects Setup", "link": "/academic/subjects"},
+          {"label": "Assessment Setup", "link": "/academic/ca-setup"},
+          {"label": "Personal Dev. Setup", "link": "/academic/character-subjects"},
+          {"label": "Time Table", "link": "/simple-timetable"},
+          {"label": "Communication Setup", "link": "/communication/setup"}
+        ]
+      },
+      {
+        "key": "COMMUNICATIONS",
+        "label": "Communications",
+        "icon": "ti ti-message-circle",
+        "feature": "communication",
+        "requiredAccess": ["admin", "branchadmin"],
+        "submenu": true,
+        "submenuItems": [
+          {"label": "Dashboard", "link": "/communications/dashboard"},
+          {"label": "Sent Messages", "link": "/communications/sent-messages"},
+          {"label": "Configuration", "link": "/communication/setup"}
+        ]
+      }
+    ]
+  },
+  {
+    "name": "SuperAdmin",
+    "requiredAccess": ["superadmin"],
+    "items": [
+      {"key": "CREATE_SCHOOL_SA", "label": "Create School", "link": "/school-setup/add-school", "requiredAccess": ["superadmin"]},
+      {"key": "SCHOOL_LIST_SA", "label": "School List", "link": "/school-setup/school-list", "requiredAccess": ["superadmin"]},
+      {"key": "SUPPORT_DASHBOARD_SA", "label": "Support Dashboard", "link": "/support/superadmin-dashboard", "requiredAccess": ["superadmin"]},
+      {"key": "QUEUE_DASHBOARD_SA", "label": "Queue Dashboard", "link": "/superadmin/queues", "requiredAccess": ["superadmin"]}
+    ]
+  }
+]

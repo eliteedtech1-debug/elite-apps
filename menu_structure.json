@@ -1,0 +1,190 @@
+[
+  {
+    "name": "Dashboard",
+    "type": "button",
+    "icon": "DashboardOutlined",
+    "route": "/admin-dashboard",
+    "requiredAccess": ["admin", "branchadmin"]
+  },
+  {
+    "name": "Personal Data Mngr",
+    "type": "divider",
+    "icon": "TeamOutlined",
+    "items": [
+      {
+        "key": "STUDENTS",
+        "label": "Students",
+        "type": "dropdown",
+        "icon": "UserOutlined",
+        "items": [
+          {"key": "STUDENT_LIST", "label": "Student List", "route": "/students"},
+          {"key": "CLASS_LIST", "label": "Class List", "route": "/classes"},
+          {"key": "STUDENT_PROMOTION", "label": "Promotion & Graduation", "route": "/students/promotion"}
+        ]
+      },
+      {
+        "key": "STAFF",
+        "label": "Staff",
+        "type": "dropdown",
+        "icon": "UserOutlined",
+        "items": [
+          {"key": "STAFF_LIST", "label": "Staff List", "route": "/teachers"},
+          {"key": "STAFF_ATTENDANCE", "label": "Staff Attendance", "route": "/attendance/staff"}
+        ]
+      },
+      {
+        "key": "PARENTS",
+        "label": "Parents",
+        "type": "dropdown",
+        "icon": "UserOutlined",
+        "items": [
+          {"key": "PARENT_LIST", "label": "Parent List", "route": "/parents"}
+        ]
+      },
+      {
+        "key": "ATTENDANCE",
+        "label": "Attendance",
+        "type": "dropdown",
+        "icon": "CheckCircleOutlined",
+        "items": [
+          {"key": "STUDENT_ATTENDANCE", "label": "Student Attendance", "route": "/attendance"},
+          {"key": "ATTENDANCE_REPORTS", "label": "Student Reports", "route": "/attendance/dashboard"},
+          {"key": "STAFF_ATTENDANCE_OVERVIEW", "label": "Staff Report", "route": "/attendance/staff-overview"}
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Academic",
+    "type": "divider",
+    "icon": "BookOutlined",
+    "items": [
+      {"key": "CLASSES", "label": "Classes", "type": "link", "route": "/classes"},
+      {"key": "SUBJECTS", "label": "Subjects", "type": "link", "route": "/subjects"},
+      {"key": "TIMETABLE", "label": "Timetable", "type": "link", "route": "/timetable"},
+      {"key": "VIRTUAL_CLASS", "label": "Virtual Class", "type": "link", "route": "/application/video-call", "premium": true}
+    ]
+  },
+  {
+    "name": "Examinations",
+    "type": "dropdown",
+    "icon": "FileTextOutlined",
+    "items": [
+      {"key": "ASSESSMENT_FORM", "label": "Assessment Form", "route": "/academic/ca-assessment-system"},
+      {"key": "FORMMASTER_REVIEW", "label": "FormMaster Review", "route": "/academic/form-master-score-sheet"},
+      {"key": "REPORTS_GENERATOR", "label": "Reports Generator", "route": "/academic/reports/Exam"},
+      {"key": "BROAD_SHEET", "label": "Broad Sheet", "route": "/academic/broad-sheet"},
+      {"key": "EXAM_ANALYTICS", "label": "Exam Analytics", "route": "/academic/exam-analytics"},
+      {"key": "REPORT_TEMPLATE", "label": "Report Template", "route": "/academic/report-configuration"}
+    ]
+  },
+  {
+    "name": "Express Finance",
+    "type": "divider",
+    "icon": "DollarOutlined",
+    "items": [
+      {"key": "FINANCE_REPORT", "label": "Finance Report", "type": "link", "route": "/management/finance/report", "premium": true},
+      {"key": "BANK_ACCOUNTS", "label": "Bank Accounts", "type": "link", "route": "/management/finance/bank-accounts", "premium": true},
+      {
+        "key": "SCHOOL_FEES",
+        "label": "School Fees",
+        "type": "dropdown",
+        "items": [
+          {"key": "FEES_SETUP", "label": "Fees Setup", "route": "/fees/setup", "premium": true},
+          {"key": "SINGLE_BILLING", "label": "Single Billing", "route": "/fees/collect", "premium": true},
+          {"key": "SINGLE_PAYMENTS", "label": "Single Payments", "route": "/fees/receipt-process", "premium": true},
+          {"key": "FAMILY_BILLING", "label": "Family Billing", "route": "/fees/family-billing", "premium": true},
+          {"key": "FAMILY_PAYMENTS", "label": "Family Payments", "route": "/parent/parentpayments", "premium": true}
+        ]
+      },
+      {
+        "key": "INCOME_EXPENSES",
+        "label": "Income & Expenses",
+        "type": "dropdown",
+        "items": [
+          {"key": "INCOME_REPORTS", "label": "Income Reports", "route": "/accounts/income-report", "premium": true},
+          {"key": "EXPENSE_REPORTS", "label": "Expenses Reports", "route": "/accounts/expense", "premium": true},
+          {"key": "PROFIT_LOSS", "label": "Profit and Loss", "route": "/accounts/profit-loss", "premium": true}
+        ]
+      },
+      {
+        "key": "PAYROLL",
+        "label": "Payroll",
+        "type": "dropdown",
+        "elite": true,
+        "items": [
+          {"key": "STAFF_PAYROLL", "label": "Staff Management", "route": "/payroll/staff-management", "elite": true},
+          {"key": "SALARY_STRUCTURE", "label": "Salary Structure", "route": "/payroll/salary-structure", "elite": true},
+          {"key": "ALLOWANCE_DEDUCTIONS", "label": "Allowance & Deductions", "route": "/payroll/allowance-deduction", "elite": true},
+          {"key": "LOAN_MANAGEMENT", "label": "Loan Management", "route": "/payroll/loan-management", "elite": true},
+          {"key": "SALARY_DISBURSEMENT", "label": "Salary Disbursement", "route": "/payroll/salary-disbursement", "elite": true},
+          {"key": "SALARY_REPORT", "label": "Salary Report", "route": "/payroll/salary-report", "elite": true}
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Supply Management",
+    "type": "divider",
+    "icon": "ShoppingCartOutlined",
+    "elite": true,
+    "items": [
+      {
+        "key": "ASSET_MANAGEMENT",
+        "label": "Asset Management",
+        "type": "dropdown",
+        "elite": true,
+        "items": [
+          {"key": "ASSET_DASHBOARD", "label": "Asset Dashboard", "route": "/supply-management/asset/dashboard", "elite": true},
+          {"key": "ASSET_INVENTORY", "label": "Asset Inventory", "route": "/supply-management/asset/inventory", "elite": true},
+          {"key": "ASSET_CATEGORIES", "label": "Asset Categories", "route": "/supply-management/asset/categories", "elite": true},
+          {"key": "FACILITY_ROOMS", "label": "Facility Rooms", "route": "/supply-management/asset/facility-rooms", "elite": true}
+        ]
+      },
+      {
+        "key": "INVENTORY_MANAGEMENT",
+        "label": "Inventory Management",
+        "type": "dropdown",
+        "elite": true,
+        "items": [
+          {"key": "INVENTORY_DASHBOARD", "label": "Inventory Dashboard", "route": "/supply-management/inventory/dashboard", "elite": true},
+          {"key": "PRODUCT_CATALOG", "label": "Product Catalog", "route": "/supply-management/inventory/products", "elite": true},
+          {"key": "STOCK_MANAGEMENT", "label": "Stock Management", "route": "/supply-management/inventory/stock", "elite": true},
+          {"key": "PURCHASE_ORDERS", "label": "Purchase Orders", "route": "/supply-management/inventory/purchase-orders", "elite": true}
+        ]
+      }
+    ]
+  },
+  {
+    "name": "General Setups",
+    "type": "divider",
+    "icon": "SettingOutlined",
+    "items": [
+      {
+        "key": "SCHOOL_SETUP",
+        "label": "School Setup",
+        "type": "dropdown",
+        "items": [
+          {"key": "ACADEMIC_CALENDAR", "label": "Academic Calendar", "route": "/academic/academic-year"},
+          {"key": "REPORT_CONFIG", "label": "Report Sheet Config", "route": "/academic/end-of-term-report-config"},
+          {"key": "RELIGION_SETUP", "label": "Religion Setup", "route": "/academic/religion"},
+          {"key": "SCHOOL_BRANCHES", "label": "School Branches", "route": "/academic/branches"},
+          {"key": "SCHOOL_SECTIONS", "label": "School Sections", "route": "/academic/section-setup"},
+          {"key": "CLASSES_SETUP", "label": "Classes Setup", "route": "/academic/classes-setup"},
+          {"key": "SUBJECTS_SETUP", "label": "Subjects Setup", "route": "/academic/subjects"},
+          {"key": "ASSESSMENT_SETUP", "label": "Assessment Setup", "route": "/academic/ca-setup"},
+          {"key": "TIME_TABLE", "label": "Time Table", "route": "/simple-timetable"}
+        ]
+      },
+      {
+        "key": "COMMUNICATIONS",
+        "label": "Communications",
+        "type": "dropdown",
+        "items": [
+          {"key": "COMMUNICATION_SETUP", "label": "Communication Setup", "route": "/communication/setup"},
+          {"key": "SMS_WHATSAPP", "label": "SMS/WhatsApp", "route": "/messaging"}
+        ]
+      }
+    ]
+  }
+]

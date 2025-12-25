@@ -1,0 +1,207 @@
+[
+  {
+    "name": "Dashboard",
+    "icon": "DashboardOutlined",
+    "route": "/admin-dashboard",
+    "requiredAccess": ["admin", "branchadmin"]
+  },
+  {
+    "name": "Personal Data Mngr",
+    "icon": "TeamOutlined",
+    "items": [
+      {
+        "key": "STUDENT_MANAGEMENT",
+        "label": "Student List",
+        "icon": "UserOutlined",
+        "route": "/students"
+      },
+      {
+        "key": "CLASS_LIST",
+        "label": "Class List",
+        "icon": "TeamOutlined",
+        "route": "/classes"
+      },
+      {
+        "key": "PARENT_MANAGEMENT",
+        "label": "Parent List",
+        "icon": "UserOutlined",
+        "route": "/parents"
+      },
+      {
+        "key": "STAFF_MANAGEMENT",
+        "label": "Staff List",
+        "icon": "UserOutlined",
+        "route": "/teachers"
+      },
+      {
+        "key": "ATTENDANCE",
+        "label": "Student Attendance",
+        "icon": "CheckCircleOutlined",
+        "route": "/attendance"
+      },
+      {
+        "key": "STAFF_ATTENDANCE",
+        "label": "Staff Attendance",
+        "icon": "IdcardOutlined",
+        "route": "/attendance/staff"
+      }
+    ]
+  },
+  {
+    "name": "Academic",
+    "icon": "BookOutlined",
+    "items": [
+      {
+        "key": "CLASS_MANAGEMENT",
+        "label": "Classes",
+        "icon": "TeamOutlined",
+        "route": "/classes"
+      },
+      {
+        "key": "SUBJECTS",
+        "label": "Subjects",
+        "icon": "BookOutlined",
+        "route": "/subjects"
+      },
+      {
+        "key": "TIMETABLE",
+        "label": "Timetable",
+        "icon": "CalendarOutlined",
+        "route": "/timetable"
+      },
+      {
+        "key": "VIRTUAL_CLASS",
+        "label": "Virtual Class",
+        "icon": "VideoCameraOutlined",
+        "route": "/application/video-call",
+        "premium": true
+      }
+    ]
+  },
+  {
+    "name": "Examinations",
+    "icon": "FileTextOutlined",
+    "items": [
+      {
+        "key": "ASSESSMENT_FORM",
+        "label": "Assessment Form",
+        "icon": "FormOutlined",
+        "route": "/academic/ca-assessment-system"
+      },
+      {
+        "key": "FORMMASTER_REVIEW",
+        "label": "FormMaster Review",
+        "icon": "AuditOutlined",
+        "route": "/academic/form-master-score-sheet"
+      },
+      {
+        "key": "REPORTS_GENERATOR",
+        "label": "Reports Generator",
+        "icon": "FileTextOutlined",
+        "route": "/academic/reports/Exam"
+      },
+      {
+        "key": "BROAD_SHEET",
+        "label": "Broad Sheet",
+        "icon": "TableOutlined",
+        "route": "/academic/broad-sheet"
+      },
+      {
+        "key": "EXAM_ANALYTICS",
+        "label": "Exam Analytics",
+        "icon": "BarChartOutlined",
+        "route": "/academic/exam-analytics"
+      }
+    ]
+  },
+  {
+    "name": "Express Finance",
+    "icon": "DollarOutlined",
+    "items": [
+      {
+        "key": "COLLECT_FEES",
+        "label": "Fee Collection",
+        "icon": "DollarOutlined",
+        "route": "/payments"
+      },
+      {
+        "key": "BASIC_REPORTS",
+        "label": "Financial Reports",
+        "icon": "FileTextOutlined",
+        "route": "/reports/financial"
+      },
+      {
+        "key": "FINANCE_REPORT",
+        "label": "Finance Report",
+        "icon": "DashboardOutlined",
+        "route": "/management/finance/report",
+        "premium": true
+      },
+      {
+        "key": "BANK_ACCOUNTS",
+        "label": "Bank Accounts",
+        "icon": "BankOutlined",
+        "route": "/management/finance/bank-accounts",
+        "premium": true
+      },
+      {
+        "key": "PAYROLL_MANAGEMENT",
+        "label": "Payroll Management",
+        "icon": "TeamOutlined",
+        "route": "/payroll/staff-management",
+        "elite": true
+      }
+    ]
+  },
+  {
+    "name": "Supply Management",
+    "icon": "ShoppingCartOutlined",
+    "elite": true,
+    "items": [
+      {
+        "key": "ASSET_DASHBOARD",
+        "label": "Asset Dashboard",
+        "icon": "DashboardOutlined",
+        "route": "/supply-management/asset/dashboard",
+        "elite": true
+      },
+      {
+        "key": "INVENTORY_DASHBOARD",
+        "label": "Inventory Dashboard",
+        "icon": "DashboardOutlined",
+        "route": "/supply-management/inventory/dashboard",
+        "elite": true
+      }
+    ]
+  },
+  {
+    "name": "General Setups",
+    "icon": "SettingOutlined",
+    "items": [
+      {
+        "key": "SETTINGS",
+        "label": "School Settings",
+        "icon": "SettingOutlined",
+        "route": "/settings"
+      },
+      {
+        "key": "ACADEMIC_CALENDAR",
+        "label": "Academic Calendar",
+        "icon": "CalendarOutlined",
+        "route": "/academic/academic-year"
+      },
+      {
+        "key": "COMMUNICATION_SETUP",
+        "label": "Communication Setup",
+        "icon": "MessageOutlined",
+        "route": "/communication/setup"
+      },
+      {
+        "key": "SMS_WHATSAPP",
+        "label": "SMS/WhatsApp",
+        "icon": "MessageOutlined",
+        "route": "/messaging"
+      }
+    ]
+  }
+]
