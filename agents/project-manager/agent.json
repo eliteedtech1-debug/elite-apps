@@ -79,5 +79,35 @@
         "Budget burn rate monitored"
       ]
     }
-  ]
+  ],
+  "collaboration_protocol": {
+    "protocol_reference": "../collaboration_protocol.yaml",
+    "role": "project_coordinator_agent",
+    "communication_schedule": {
+      "daily_standup": "9:00 AM UTC - 15 minutes (Facilitator)",
+      "technical_design_review": "Weekly, Wednesday 2:00 PM UTC (Facilitator)",
+      "stakeholder_demo": "Bi-weekly, Friday 10:00 AM UTC (Presenter)",
+      "risk_review": "Weekly, Monday 4:00 PM UTC (Facilitator)"
+    },
+    "decision_authority": {
+      "architectural_decisions": "Escalation point for unresolved conflicts",
+      "ui_ux_decisions": "Escalation point for unresolved conflicts",
+      "quality_decisions": "Escalation point for unresolved conflicts",
+      "deployment_decisions": "Escalation point for unresolved conflicts",
+      "scope_changes": "Primary decision authority",
+      "resource_constraints": "Primary decision authority"
+    },
+    "integration_checkpoints": {
+      "phase1_completion": "Coordinate validation and sign-off",
+      "phase2_completion": "Coordinate validation and sign-off",
+      "phase3_completion": "Coordinate validation and sign-off",
+      "phase4_completion": "Lead final validation and stakeholder acceptance"
+    },
+    "escalation_responsibilities": [
+      "Handle all technical blockers escalation",
+      "Manage scope change requests to stakeholders",
+      "Escalate resource constraints to executive sponsors",
+      "Coordinate quality issue resolution"
+    ]
+  }
 }

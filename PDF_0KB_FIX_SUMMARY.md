@@ -57,8 +57,8 @@ All of these are **native browser APIs** that work reliably!
 console.log(`📄 PDF Blob created: ${blob.size} bytes (${(blob.size / 1024).toFixed(2)} KB)`);
 
 if (blob.size === 0) {
-  toast.dismiss(loadingToast);
-  toast.error("Failed to generate PDF invoice. Please try again.");
+  message.dismiss(loadingToast);
+  message.error("Failed to generate PDF invoice. Please try again.");
   console.error("❌ PDF blob is empty!");
   return;
 }
@@ -70,8 +70,8 @@ if (blob.size === 0) {
 console.log(`📊 Base64 length: ${pdfBase64.length} characters (${(pdfBase64.length / 1024).toFixed(2)} KB)`);
 
 if (!pdfBase64 || pdfBase64.length === 0) {
-  toast.dismiss(loadingToast);
-  toast.error("Failed to encode PDF. Please try again.");
+  message.dismiss(loadingToast);
+  message.error("Failed to encode PDF. Please try again.");
   console.error("❌ Base64 conversion failed!");
   return;
 }

@@ -88,7 +88,7 @@ Added school context validation before API call:
 // Validate that we have school context before proceeding
 if (!form.school_id || form.school_id.trim() === '') {
   console.error('❌ School context missing!', { ... });
-  toast.error("School context not found. Please ensure you're accessing from the correct domain.");
+  message.error("School context not found. Please ensure you're accessing from the correct domain.");
   setLoading(false);
   return;
 }

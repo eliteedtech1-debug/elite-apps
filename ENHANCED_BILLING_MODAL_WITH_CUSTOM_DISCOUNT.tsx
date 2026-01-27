@@ -206,13 +206,13 @@ useEffect(() => {
 
 const handleCreateSubscription = () => {
   if (!selectedSchool || !selectedPricingPlan || !billingCalculation) {
-    toast.error("Please complete all billing information");
+    message.error("Please complete all billing information");
     return;
   }
 
   // ✅ VALIDATION: If custom discount is added but no notes
   if (customDiscount > 0 && !discountNotes.trim()) {
-    toast.error("Please add notes explaining the custom discount");
+    message.error("Please add notes explaining the custom discount");
     return;
   }
 
@@ -243,7 +243,7 @@ const handleCreateSubscription = () => {
     payload,
     (res: any) => {
       if (res.success) {
-        toast.success("Subscription created successfully!");
+        message.success("Subscription created successfully!");
         setIsBillingModalVisible(false);
         setBillingCalculation(null);
         setSelectedPricingPlan(null);
@@ -254,7 +254,7 @@ const handleCreateSubscription = () => {
       }
     },
     (err: any) => {
-      toast.error(err.message || "Error creating subscription");
+      message.error(err.message || "Error creating subscription");
     }
   );
 };

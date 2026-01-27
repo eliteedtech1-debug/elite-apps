@@ -47,7 +47,7 @@ const fetchGPSLocation = async (): Promise<{lat: number, lon: number} | null> =>
     const errorMsg = getGPSErrorMessage(gpsError);
 
     if (gpsError.code === 'GPS_PERMISSION_DENIED') {
-      toast.warning(
+      message.warning(
         <div>
           <div className="fw-bold mb-1">Location Access Required</div>
           <div className="small">{errorMsg}</div>
@@ -56,7 +56,7 @@ const fetchGPSLocation = async (): Promise<{lat: number, lon: number} | null> =>
         { autoClose: 10000 }
       );
     } else {
-      toast.info(errorMsg, { autoClose: 5000 });
+      message.info(errorMsg, { autoClose: 5000 });
     }
 
     return null;
@@ -121,7 +121,7 @@ const handleSubmit = async (e: React.FormEvent) => {
         minute: '2-digit'
       });
 
-      toast.success(
+      message.success(
         <div>
           <div className="fw-bold">{statusIcon} Attendance Marked</div>
           <div className="small mt-1">
@@ -137,7 +137,7 @@ const handleSubmit = async (e: React.FormEvent) => {
       );
     }
 
-    toast.success("Login successfully!");
+    message.success("Login successfully!");
 
     const user = data.user;
     switch (user.user_type?.toLowerCase()) {
@@ -172,7 +172,7 @@ const handleSubmit = async (e: React.FormEvent) => {
 
     // Handle GPS required error
     if (err && err.error === 'GPS_REQUIRED') {
-      toast.error(
+      message.error(
         <div>
           <div className="fw-bold mb-1">📍 GPS Location Required</div>
           <div className="small">{err.message || 'GPS location is required for staff login.'}</div>
@@ -186,7 +186,7 @@ const handleSubmit = async (e: React.FormEvent) => {
     // Handle outside radius error
     if (err && err.error === 'OUTSIDE_RADIUS') {
       const data = err.data || {};
-      toast.error(
+      message.error(
         <div>
           <div className="fw-bold mb-1">⛔ Outside Permitted Area</div>
           <div className="small mb-2">{err.message}</div>
@@ -205,7 +205,7 @@ const handleSubmit = async (e: React.FormEvent) => {
 
     // Handle GPS not configured error
     if (err && err.error === 'GPS_NOT_CONFIGURED') {
-      toast.warning(
+      message.warning(
         <div>
           <div className="fw-bold mb-1">⚙️ GPS Not Configured</div>
           <div className="small">{err.message || 'GPS coordinates not configured for your branch.'}</div>
@@ -222,35 +222,35 @@ const handleSubmit = async (e: React.FormEvent) => {
 
     // Handle account activation errors specially
     if (err && err.error === 'ACCOUNT_NOT_ACTIVATED') {
-      toast.error(err.message || 'Your account is not activated. Please check your phone/email for the activation OTP.');
+      message.error(err.message || 'Your account is not activated. Please check your phone/email for the activation OTP.');
       return;
     }
 
     // Handle password change required
     if (err && err.error === 'PASSWORD_CHANGE_REQUIRED') {
-      toast.warning(err.message || 'You must change your password before logging in.');
+      message.warning(err.message || 'You must change your password before logging in.');
       return;
     }
 
     // Check if the error has a message property (standard API error format)
     if (err && err.message) {
-      toast.error(err.message);
+      message.error(err.message);
     } else if (err && err?.password) {
-      toast.error(err?.password);
+      message.error(err?.password);
     } else if (err && err?.username) {
-      toast.error(err?.username);
+      message.error(err?.username);
     } else if (err && err?.status) {
-      toast.error(err?.status);
+      message.error(err?.status);
     } else if (err && err?.school) {
-      toast.error(err?.school);
+      message.error(err?.school);
     } else if (err && typeof err === 'string') {
-      toast.error(err);
+      message.error(err);
     } else if (err && typeof err === 'object') {
       const values = Object.values(err).filter(v => typeof v === 'string' && v !== 'false' && v !== 'true');
       const errorMessage = values.length > 0 ? values.join(', ') : "An error occurred. Please check your connection and try again.";
-      toast.error(errorMessage);
+      message.error(errorMessage);
     } else {
-      toast.warning("An error occurred. Please check your connection and try again.");
+      message.warning("An error occurred. Please check your connection and try again.");
     }
   };
 

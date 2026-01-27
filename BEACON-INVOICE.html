@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elite Edutech Invoice</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .container {
+            max-width: 900px;
+            width: 100%;
+        }
+        
+        .download-btn {
+            background: white;
+            color: #667eea;
+            border: none;
+            padding: 15px 40px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+        
+        #invoice {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+        }
+        
+        .logo-section {
+            flex: 1;
+        }
+        
+        .logo {
+            width: 200px;
+            height: auto;
+            margin-bottom: 15px;
+        }
+        
+        .company-info {
+            font-size: 12px;
+            color: #555;
+            line-height: 1.6;
+        }
+        
+        .invoice-title {
+            text-align: right;
+            flex: 1;
+        }
+        
+        .invoice-title h1 {
+            color: #667eea;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        
+        .invoice-date {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .client-section {
+            background: #f8f9ff;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        
+        .client-section h2 {
+            color: #667eea;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        
+        .client-info {
+            font-size: 14px;
+            color: #555;
+            line-height: 1.8;
+        }
+        
+        .subscription-info {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        
+        .info-item {
+            background: #f8f9ff;
+            padding: 15px;
+            border-radius: 6px;
+        }
+        
+        .info-label {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+        
+        thead {
+            background: #667eea;
+            color: white;
+        }
+        
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        th.amount {
+            text-align: right;
+        }
+        
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 13px;
+            color: #555;
+        }
+        
+        tbody tr:hover {
+            background: #f8f9ff;
+        }
+        
+        .amount {
+            text-align: right;
+            font-weight: 500;
+        }
+        
+        .totals-section {
+            margin-left: auto;
+            width: 400px;
+            border-top: 2px solid #667eea;
+            padding-top: 15px;
+        }
+        
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            font-size: 14px;
+        }
+        
+        .total-row.subtotal {
+            color: #666;
+        }
+        
+        .total-row.discount {
+            color: #e74c3c;
+        }
+        
+        .total-row.vat {
+            color: #666;
+            border-top: 1px solid #e0e0e0;
+            margin-top: 5px;
+            padding-top: 15px;
+        }
+        
+        .total-row.final {
+            font-size: 18px;
+            font-weight: bold;
+            color: #667eea;
+            border-top: 2px solid #667eea;
+            margin-top: 10px;
+            padding-top: 15px;
+        }
+        
+        .payment-details {
+            background: #f8f9ff;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .payment-details h3 {
+            color: #667eea;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+        
+        .payment-info {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            font-size: 13px;
+        }
+        
+        .payment-item strong {
+            display: block;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+        
+        .footer {
+            text-align: center;
+            color: #999;
+            font-size: 12px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            
+            .download-btn {
+                display: none;
+            }
+            
+            #invoice {
+                box-shadow: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="download-btn" onclick="generatePDF()">📥 Download PDF Invoice</button>
+        
+        <div id="invoice">
+            <div class="header">
+                <div class="logo-section">
+                    <img src="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"
+                    <div class="company-info">
+                        <strong>Elite Edutech LTD</strong><br>
+                        F1 African Alliance Building, Sani Abacha Way,<br>
+                        Airport Road, Kano<br>
+                        📞 +234-912-4611-644<br>
+                        ✉️ info@elitescholar.ng
+                    </div>
+                </div>
+                <div class="invoice-title">
+                    <h1>INVOICE</h1>
+                    <div class="invoice-date"><strong>Date:</strong> January 26, 2026</div>
+                </div>
+            </div>
+            
+            <div class="client-section">
+                <h2>BILL TO</h2>
+                <div class="client-info">
+                    <strong>BEACON HILL ACADEMY</strong><br>
+                    No. 76 Foundation Road/Tarauni,<br>
+                    Kano State, Nigeria<br>
+                    Kano, TARAUNI
+                </div>
+            </div>
+            
+            <div class="subscription-info">
+                <div class="info-item">
+                    <div class="info-label">Service Term</div>
+                    <div>Per Annum</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Academic Session</div>
+                    <div>2025/2026</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Number of Students</div>
+                    <div>58 Students</div>
+                </div>
+            </div>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Description</th>
+                        <th>Calculation</th>
+                        <th class="amount">Amount (₦)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Base Subscription</strong></td>
+                        <td>58 students × ₦1,500.00 (3 terms)</td>
+                        <td class="amount">87,000.00</td>
+                    </tr>
+                    <tr>
+                        <td><strong>E-Learning Module Addon</strong></td>
+                        <td>58 students × ₦1,500.00 per annum</td>
+                        <td class="amount">87,000.00</td>
+                    </tr>
+                    <tr>
+                        <td><strong>SMS & Email Notifications Addon</strong></td>
+                        <td>₦10,000.00 (₦5.00 per unit × 2,000 units)</td>
+                        <td class="amount">10,000.00</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div class="totals-section">
+                <div class="total-row subtotal">
+                    <span>Subtotal before discounts:</span>
+                    <span>₦184,000.00</span>
+                </div>
+                <div class="total-row discount">
+                    <span>Annual discount (15.00%):</span>
+                    <span>-₦27,600.00</span>
+                </div>
+                <div class="total-row">
+                    <span>Subtotal after discounts:</span>
+                    <span>₦156,400.00</span>
+                </div>
+                <div class="total-row vat">
+                    <span>VAT (7.5%):</span>
+                    <span>₦11,730.00</span>
+                </div>
+                <div class="total-row final">
+                    <span>TOTAL AMOUNT:</span>
+                    <span>₦168,130.00</span>
+                </div>
+            </div>
+            
+            <div class="payment-details">
+                <h3>Payment Details</h3>
+                <div class="payment-info">
+                    <div class="payment-item">
+                        <strong>Account Name:</strong>
+                        Elite Edutech Systems Ltd.
+                    </div>
+                    <div class="payment-item">
+                        <strong>Account Number:</strong>
+                        1013842384
+                    </div>
+                    <div class="payment-item">
+                        <strong>Bank:</strong>
+                        Keystone Bank
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer">
+                <p>Thank you for choosing our services. For any inquiries, please contact us.</p>
+                <p style="margin-top: 10px;"><em>This is a computer generated invoice and does not require signature.</em></p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function generatePDF() {
+            const element = document.getElementById('invoice');
+            const opt = {
+                margin: 10,
+                filename: 'Elite_Edutech_Invoice_Beacon_Hill_Academy.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+            
+            html2pdf().set(opt).from(element).save();
+        }
+    </script>
+</body>
+</html>

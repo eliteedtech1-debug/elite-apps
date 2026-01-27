@@ -78,5 +78,25 @@
         "Loading states with skeleton screens"
       ]
     }
-  ]
+  ],
+  "collaboration_protocol": {
+    "protocol_reference": "../collaboration_protocol.yaml",
+    "role": "frontend_agent",
+    "communication_schedule": {
+      "daily_standup": "9:00 AM UTC - 15 minutes (Participant)",
+      "technical_design_review": "Weekly, Wednesday 2:00 PM UTC (Participant)",
+      "stakeholder_demo": "Bi-weekly, Friday 10:00 AM UTC (UI Demo)",
+      "risk_review": "Weekly, Monday 4:00 PM UTC (Participant)"
+    },
+    "decision_authority": {
+      "ui_ux_decisions": "Primary approver (with financial_domain_agent)",
+      "frontend_architecture": "Primary decision authority",
+      "component_design": "Primary decision authority"
+    },
+    "integration_checkpoints": {
+      "phase2_completion": "Validator for frontend components & integration",
+      "phase3_completion": "Participant in end-to-end testing validation"
+    },
+    "escalation_path": "Technical blockers → Project coordinator → Relevant technical leads"
+  }
 }

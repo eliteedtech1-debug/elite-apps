@@ -12,7 +12,7 @@ Instead of showing an error message when WhatsApp is not connected, the system n
 When user tried to send WhatsApp without being connected:
 ```typescript
 if (!whatsappConnected) {
-  toast.error("WhatsApp is not connected. Please go to Communication Setup to connect your WhatsApp account.", {
+  message.error("WhatsApp is not connected. Please go to Communication Setup to connect your WhatsApp account.", {
     autoClose: 5000
   });
   return;
@@ -25,7 +25,7 @@ if (!whatsappConnected) {
 ### **After:**
 ```typescript
 if (!whatsappConnected) {
-  toast.info("📱 WhatsApp is not connected. Opening connection setup...", {
+  message.info("📱 WhatsApp is not connected. Opening connection setup...", {
     autoClose: 3000
   });
   setWhatsappConnectionModalVisible(true);
@@ -83,7 +83,7 @@ if (!whatsappConnected) {
 **Before:**
 ```typescript
 if (!whatsappConnected) {
-  toast.error("WhatsApp is not connected. Please go to Communication Setup...");
+  message.error("WhatsApp is not connected. Please go to Communication Setup...");
   return;
 }
 ```
@@ -91,7 +91,7 @@ if (!whatsappConnected) {
 **After:**
 ```typescript
 if (!whatsappConnected) {
-  toast.info("📱 WhatsApp is not connected. Opening connection setup...", {
+  message.info("📱 WhatsApp is not connected. Opening connection setup...", {
     autoClose: 3000
   });
   setWhatsappConnectionModalVisible(true);
@@ -107,13 +107,13 @@ if (!whatsappConnected) {
 ```typescript
 // ✅ Check if WhatsApp subscription is active
 if (!school?.whatsapp_subscription) {
-  toast.warning("WhatsApp feature not subscribed. Please contact admin to enable.");
+  message.warning("WhatsApp feature not subscribed. Please contact admin to enable.");
   return;
 }
 
 // ✅ Check if WhatsApp is connected - if not, open connection modal
 if (!whatsappConnected) {
-  toast.info("📱 WhatsApp is not connected. Opening connection setup...", {
+  message.info("📱 WhatsApp is not connected. Opening connection setup...", {
     autoClose: 3000
   });
   setWhatsappConnectionModalVisible(true);
@@ -130,7 +130,7 @@ if (!whatsappConnected) {
 **Before:**
 ```typescript
 onConnected={() => {
-  toast.success("WhatsApp connected! You can now send messages.");
+  message.success("WhatsApp connected! You can now send messages.");
   setWhatsappConnectionModalVisible(false);
   checkWhatsAppStatus(); // ❌ This function was removed
 }}
@@ -139,7 +139,7 @@ onConnected={() => {
 **After:**
 ```typescript
 onConnected={() => {
-  toast.success("✅ WhatsApp connected! You can now send messages.");
+  message.success("✅ WhatsApp connected! You can now send messages.");
   setWhatsappConnectionModalVisible(false);
   // ✅ Refresh WhatsApp status using global context
   checkWhatsAppStatus();

@@ -113,10 +113,11 @@
         "label": "Payroll",
         "icon": "TeamOutlined",
         "elite": true,
-        "items": [
+          "items": [
           {"key": "STAFF_PAYROLL", "label": "Staff Management", "route": "/payroll/staff-payroll", "elite": true},
           {"key": "SALARY_STRUCTURE", "label": "Salary Structure", "route": "/payroll/structure", "elite": true},
           {"key": "ALLOWANCE_DEDUCTIONS", "label": "Allowance & Deductions", "route": "/payrol/Allowances/deductions", "elite": true},
+          {"key": "ALLOWANCE_PACKAGES", "label": "Allowance Packages", "route": "/payrol/Allowances/deductions", "elite": true},
           {"key": "LOAN_MANAGEMENT", "label": "Loan Management", "route": "/payroll/loan-management", "elite": true},
           {"key": "SALARY_DISBURSEMENT", "label": "Salary Disbursement", "route": "/payroll/salary-disbursement", "elite": true},
           {"key": "SALARY_REPORT", "label": "Salary Report", "route": "/payroll/salary-report", "elite": true}

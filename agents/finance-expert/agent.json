@@ -79,5 +79,29 @@
         "Board-ready executive summary"
       ]
     }
-  ]
+  ],
+  "collaboration_protocol": {
+    "protocol_reference": "../collaboration_protocol.yaml",
+    "role": "financial_domain_agent",
+    "communication_schedule": {
+      "daily_standup": "9:00 AM UTC - 15 minutes (Participant)",
+      "technical_design_review": "Weekly, Wednesday 2:00 PM UTC (Domain Expert)",
+      "stakeholder_demo": "Bi-weekly, Friday 10:00 AM UTC (Business Logic Demo)",
+      "risk_review": "Weekly, Monday 4:00 PM UTC (Compliance Risk Reviewer)"
+    },
+    "decision_authority": {
+      "architectural_decisions": "Primary approver (with backend_agent and database_agent)",
+      "ui_ux_decisions": "Primary approver (with frontend_agent)",
+      "quality_decisions": "Primary approver (with qa_agent)",
+      "financial_compliance": "Primary decision authority",
+      "accounting_rules": "Primary decision authority"
+    },
+    "integration_checkpoints": {
+      "phase1_completion": "Validator for financial data integrity",
+      "phase2_completion": "Validator for financial UI compliance",
+      "phase3_completion": "Primary validator for end-to-end testing & performance validation",
+      "phase4_completion": "Validator for production deployment & user acceptance"
+    },
+    "escalation_path": "Compliance issues → Project coordinator → Stakeholders"
+  }
 }

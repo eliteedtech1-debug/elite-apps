@@ -259,12 +259,12 @@ In the billing modal, after the "Enabled Features" section, add:
 ```typescript
 const handleCreateSubscription = () => {
   if (!selectedSchool || !selectedPricingPlan || !billingCalculation) {
-    toast.error("Please complete all billing information");
+    message.error("Please complete all billing information");
     return;
   }
 
   if (customDiscount > 0 && !discountNotes.trim()) {
-    toast.error("Please add notes explaining the custom discount");
+    message.error("Please add notes explaining the custom discount");
     return;
   }
 
@@ -300,13 +300,13 @@ const handleCreateSubscription = () => {
     payload,
     (res: any) => {
       if (res.success) {
-        toast.success("Subscription created successfully!");
+        message.success("Subscription created successfully!");
         if (
           selectedMessagingPackages.sms ||
           selectedMessagingPackages.whatsapp ||
           selectedMessagingPackages.email
         ) {
-          toast.info("Messaging packages assigned to school!");
+          message.info("Messaging packages assigned to school!");
         }
 
         setIsBillingModalVisible(false);
@@ -323,7 +323,7 @@ const handleCreateSubscription = () => {
       }
     },
     (err: any) => {
-      toast.error(err.message || "Error creating subscription");
+      message.error(err.message || "Error creating subscription");
     }
   );
 };

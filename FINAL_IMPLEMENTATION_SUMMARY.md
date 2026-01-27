@@ -256,7 +256,7 @@ const {
 ```typescript
 // ✅ Check if WhatsApp is connected
 if (!whatsappConnected) {
-  toast.error("WhatsApp is not connected. Please go to Communication Setup to connect your WhatsApp account.", {
+  message.error("WhatsApp is not connected. Please go to Communication Setup to connect your WhatsApp account.", {
     autoClose: 5000
   });
   return;
@@ -416,7 +416,7 @@ const { isConnected } = useWhatsApp();
 
 const handleSend = () => {
   if (!isConnected) {
-    toast.error("Please connect WhatsApp first");
+    message.error("Please connect WhatsApp first");
     return;
   }
   // Proceed with sending...

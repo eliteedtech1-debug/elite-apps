@@ -180,6 +180,7 @@
           {"label": "Staff Management", "link": "/payroll/staff-payroll"},
           {"label": "Salary Structure", "link": "/payroll/structure"},
           {"label": "Allowance & Deductions", "link": "/payrol/Allowances/deductions"},
+          {"label": "Allowance Packages", "link": "/payrol/Allowances/deductions"},
           {"label": "Loan Management", "link": "/payroll/loan-management"},
           {"label": "Salary Disbursement", "link": "/payroll/salary-disbursement"},
           {"label": "Salary Report", "link": "/payroll/salary-report"}

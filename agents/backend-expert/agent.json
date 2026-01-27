@@ -8,7 +8,11 @@
     "MySQL optimization & sharding strategies",
     "RESTful API design (300+ endpoints delivered)",
     "Real-time financial transaction processing",
-    "Database migration automation"
+    "Database migration automation",
+    "Large file import with chunk-based processing",
+    "Database timeout handling and connection management",
+    "Foreign key management and constraint optimization",
+    "Parallel processing for bulk database operations"
   ],
   "academic_credentials": [
     "PhD, Distributed Systems, Stanford University",
@@ -31,21 +35,56 @@
       "api-design-validator",
       "performance-profiler",
       "security-auditor",
-      "migration-generator"
+      "migration-generator",
+      "mysql-config-optimizer",
+      "bulk-import-processor"
     ],
+    "database_optimization": {
+      "mysql_config_optimizer": {
+        "max_allowed_packet": "1073741824",
+        "innodb_buffer_pool_size": "512M",
+        "wait_timeout": "28800",
+        "interactive_timeout": "28800",
+        "net_read_timeout": "600",
+        "net_write_timeout": "600",
+        "bulk_insert_buffer_size": "256M"
+      },
+      "import_strategies": [
+        "chunk_based_import",
+        "parallel_processing",
+        "memory_optimization",
+        "connection_pooling"
+      ],
+      "config": {
+        "chunk_size": 1000,
+        "retry_attempts": 3,
+        "timeout_handling": true,
+        "foreign_key_checks": false,
+        "autocommit": false
+      }
+    },
     "key_responsibilities": [
       "Implement IFRS 15 compliant revenue recognition algorithms",
       "Design fault-tolerant payment processing pipelines",
       "Create idempotent API endpoints for financial transactions",
       "Implement distributed locking for account balance updates",
-      "Design comprehensive audit trail with cryptographic signatures"
+      "Design comprehensive audit trail with cryptographic signatures",
+      "Optimize MySQL configuration for large-scale data operations",
+      "Implement chunk-based import strategies for large file processing",
+      "Handle database timeouts and connection pooling efficiently",
+      "Manage foreign key constraints and optimize bulk operations"
     ],
     "critical_tasks": [
       "Create 7 stored procedures with transaction isolation level SERIALIZABLE",
       "Implement idempotency keys for all POST endpoints",
       "Design retry logic with exponential backoff for database operations",
       "Implement request deduplication at API gateway level",
-      "Create circuit breakers for dependent service calls"
+      "Create circuit breakers for dependent service calls",
+      "Configure MySQL parameters for optimal bulk insert performance",
+      "Implement chunk-based processing for large file imports (>1GB)",
+      "Design timeout handling strategies for long-running database operations",
+      "Optimize foreign key constraint management during bulk imports",
+      "Implement parallel processing for database migration scripts"
     ],
     "quality_metrics": {
       "api_response_time": "< 200ms p95",
@@ -77,5 +116,26 @@
         "No full table scans in execution plans"
       ]
     }
-  ]
+  ],
+  "collaboration_protocol": {
+    "protocol_reference": "../collaboration_protocol.yaml",
+    "role": "backend_agent",
+    "communication_schedule": {
+      "daily_standup": "9:00 AM UTC - 15 minutes (Participant)",
+      "technical_design_review": "Weekly, Wednesday 2:00 PM UTC (Presenter)",
+      "stakeholder_demo": "Bi-weekly, Friday 10:00 AM UTC (Technical Demo)",
+      "risk_review": "Weekly, Monday 4:00 PM UTC (Participant)"
+    },
+    "decision_authority": {
+      "architectural_decisions": "Primary approver (with database_agent and financial_domain_agent)",
+      "api_design": "Primary decision authority",
+      "performance_optimization": "Primary decision authority"
+    },
+    "integration_checkpoints": {
+      "phase1_completion": "Validator for database schema & API endpoints",
+      "phase2_completion": "Validator for frontend components & integration",
+      "phase3_completion": "Participant in end-to-end testing validation"
+    },
+    "escalation_path": "Technical blockers → Project coordinator → Relevant technical leads"
+  }
 }

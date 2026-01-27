@@ -29,7 +29,7 @@ const { isConnected } = useWhatsApp();
 
 const handleSend = () => {
   if (!isConnected) {
-    toast.error("WhatsApp not connected");
+    message.error("WhatsApp not connected");
     return;
   }
   // Send message...

@@ -13,20 +13,20 @@ for file in $FILES; do
     fi
     
     # Replace import statements
-    sed -i '' 's/import { toast } from "react-toastify";/import { message } from "antd";/g' "$file"
+    sed -i '' 's/// import { toast } from "react-toastify";/import { message } from "antd";/g' "$file"
     sed -i '' 's/import { toast } from '\''react-toastify'\'';/import { message } from "antd";/g' "$file"
     
-    # Replace toast.success with message.success
+    # Replace message.success with message.success
     sed -i '' 's/toast\.success(/message.success(/g' "$file"
     
-    # Replace toast.error with message.error
+    # Replace message.error with message.error
     sed -i '' 's/toast\.error(/message.error(/g' "$file"
     
-    # Replace toast.warning with message.warning
+    # Replace message.warning with message.warning
     sed -i '' 's/toast\.warning(/message.warning(/g' "$file"
     sed -i '' 's/toast\.warn(/message.warning(/g' "$file"
     
-    # Replace toast.info with message.info
+    # Replace message.info with message.info
     sed -i '' 's/toast\.info(/message.info(/g' "$file"
     
     echo "✅ Updated: $file"

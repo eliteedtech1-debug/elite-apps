@@ -16,7 +16,7 @@ After conducting a thorough scan of the entire ElScholar UI codebase, I have ide
 
 ### **UI Interface Components (React Bootstrap Toast)**
 - `elscholar-ui/src/feature-module/uiInterface/base-ui/toasts.tsx` - Uses React Bootstrap Toast components
-- `elscholar-ui/src/feature-module/router/NetworkToast.tsx` - Custom toast implementation
+- `elscholar-ui/src/feature-module/router/Networkmessage.tsx` - Custom toast implementation
 - `elscholar-ui/src/feature-module/router/optimized-router.tsx` - Only has commented import
 
 **Note**: These files use different toast systems and should NOT be migrated.

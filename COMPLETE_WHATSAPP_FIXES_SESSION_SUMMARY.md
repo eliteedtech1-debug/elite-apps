@@ -60,7 +60,7 @@ const {
 **Before:**
 ```typescript
 if (!whatsappConnected) {
-  toast.error("WhatsApp is not connected. Please go to Communication Setup to connect your WhatsApp account.", {
+  message.error("WhatsApp is not connected. Please go to Communication Setup to connect your WhatsApp account.", {
     autoClose: 5000
   });
   return;
@@ -70,7 +70,7 @@ if (!whatsappConnected) {
 **After:**
 ```typescript
 if (!whatsappConnected) {
-  toast.info("📱 WhatsApp is not connected. Opening connection setup...", {
+  message.info("📱 WhatsApp is not connected. Opening connection setup...", {
     autoClose: 3000
   });
   setWhatsappConnectionModalVisible(true);
@@ -94,7 +94,7 @@ if (!whatsappConnected) {
 ```typescript
 const handleBulkWhatsAppShare = async () => {
   if (selectedRows.length === 0) {
-    toast.warning('Please select students first');
+    message.warning('Please select students first');
     return;
   }
 
@@ -108,19 +108,19 @@ const handleBulkWhatsAppShare = async () => {
 ```typescript
 const handleBulkWhatsAppShare = async () => {
   if (selectedRows.length === 0) {
-    toast.warning('Please select students first');
+    message.warning('Please select students first');
     return;
   }
 
   // ✅ Check subscription
   if (!school?.whatsapp_subscription) {
-    toast.warning("WhatsApp feature not subscribed. Please contact admin to enable.");
+    message.warning("WhatsApp feature not subscribed. Please contact admin to enable.");
     return;
   }
 
   // ✅ Check connection - auto-open modal if not connected
   if (!whatsappConnected) {
-    toast.info("📱 WhatsApp is not connected. Opening connection setup...", {
+    message.info("📱 WhatsApp is not connected. Opening connection setup...", {
       autoClose: 3000
     });
     setWhatsappConnectionModalVisible(true);
@@ -146,7 +146,7 @@ const handleBulkWhatsAppShare = async () => {
 **Before:**
 ```typescript
 onConnected={() => {
-  toast.success("WhatsApp connected! You can now send messages.");
+  message.success("WhatsApp connected! You can now send messages.");
   setWhatsappConnectionModalVisible(false);
   checkWhatsAppStatus(); // ❌ This local function was deleted in Fix 1
 }}
@@ -155,7 +155,7 @@ onConnected={() => {
 **After:**
 ```typescript
 onConnected={() => {
-  toast.success("✅ WhatsApp connected! You can now send messages.");
+  message.success("✅ WhatsApp connected! You can now send messages.");
   setWhatsappConnectionModalVisible(false);
   // ✅ Refresh WhatsApp status using global context
   checkWhatsAppStatus(); // Now uses context function from useWhatsApp()
@@ -208,7 +208,7 @@ onConnected={() => {
    ```typescript
    // Check 1: Subscription active?
    if (!school?.whatsapp_subscription) {
-     toast.warning("WhatsApp feature not subscribed...");
+     message.warning("WhatsApp feature not subscribed...");
      return;
    }
 
@@ -221,14 +221,14 @@ onConnected={() => {
 
    // Check 3: Parent phone exists?
    if (!student.parent_phone) {
-     toast.warning("No parent phone number...");
+     message.warning("No parent phone number...");
      return;
    }
 
    // Check 4: Phone valid?
    const formattedPhone = formatNigerianPhone(student.parent_phone);
    if (!formattedPhone) {
-     toast.error("Invalid phone number...");
+     message.error("Invalid phone number...");
      return;
    }
    ```

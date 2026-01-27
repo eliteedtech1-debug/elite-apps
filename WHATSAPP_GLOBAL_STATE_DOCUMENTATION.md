@@ -259,7 +259,7 @@ const BillClasses = () => {
   const handleSendWhatsAppDirect = async (student: Student) => {
     // ✅ Check if WhatsApp is connected
     if (!whatsappConnected) {
-      toast.error("WhatsApp is not connected. Please go to Communication Setup to connect your WhatsApp account.");
+      message.error("WhatsApp is not connected. Please go to Communication Setup to connect your WhatsApp account.");
       return;
     }
 
@@ -477,7 +477,7 @@ const WhatsAppSettings = () => {
 2. **Check Connection Before Sending**
    ```typescript
    if (!isConnected) {
-     toast.error("Please connect WhatsApp first");
+     message.error("Please connect WhatsApp first");
      return;
    }
    ```
@@ -526,7 +526,7 @@ const WhatsAppSettings = () => {
 
    // ✅ Good - checks first
    if (!isConnected) {
-     toast.error("WhatsApp not connected");
+     message.error("WhatsApp not connected");
      return;
    }
    sendWhatsAppMessage(phone, message);

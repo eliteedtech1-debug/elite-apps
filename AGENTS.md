@@ -508,7 +508,7 @@ npm run build:craco # Build with increased memory
 ### Environment
 - **API Port:** 34567
 - **UI Port:** 3000
-- **Database:** skcooly_db
+- **Database:** full_skcooly or reead /elscholar-api/.env for latest active DB
 - **Node Version:** 18+
 
 ### Critical Reminders
