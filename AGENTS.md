@@ -2,7 +2,47 @@
 
 > **Optimized for:** Anthropic Claude (Primary) | OpenCode (Secondary) | Google Gemini (Tertiary)
 > 
-> **Last Updated:** 2025-12-13
+> **Last Updated:** 2026-02-06
+
+---
+
+## 🔑 Critical: Multi-Tenant Context Headers
+
+**ALL API requests MUST include these headers for proper school/branch isolation:**
+
+```bash
+-H 'X-School-Id: SCH/20'      # Current school context
+-H 'X-Branch-Id: BRCH00027'   # Current branch context
+```
+
+**Backend Implementation Rule:**
+```javascript
+// ALWAYS use headers as primary source, fallback to req.user
+const school_id = req.headers['x-school-id'] || req.user.school_id;
+const branch_id = req.headers['x-branch-id'] || req.user.branch_id;
+```
+
+**Why This Matters:**
+- Ensures correct data isolation in multi-tenant system
+- Prevents cross-school data leakage
+- Required for all CREATE, UPDATE, DELETE operations
+- Frontend automatically sends these headers
+
+---
+
+## 💰 Financial System Overview
+
+### Revenue & Expenditure Tracking:
+- **Revenue**: ₦30,000.00 (expected from student bills)
+- **Expenditure**: ₦0.00 (no processed payroll yet)
+- **Pending Payroll**: ₦25,050.00 (4 staff records)
+
+### Key Tables:
+- `payment_entries` - Revenue (cr=bills, dr=payments)
+- `payroll_lines` - Expenditure (net_pay where is_processed=1)
+- Current DB: `full_skcooly` | School: SCH/23 | Branch: BRCH/29
+
+### API: `POST /payments/revenue-expenditure`
 
 ---
 

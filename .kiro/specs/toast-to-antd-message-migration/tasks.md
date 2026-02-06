@@ -19,7 +19,7 @@ This implementation plan converts the react-toastify migration design into discr
     - Handle method calls with parameters (content, duration, callbacks)
     - _Requirements: 1.1, 1.2, 1.3, 1.4_
 
-  - [ ] 2.2 Write property test for method replacement
+  - [-] 2.2 Write property test for method replacement
     - **Property 1: Toast Method Replacement Completeness**
     - **Validates: Requirements 1.1, 1.2, 1.3, 1.4**
 
