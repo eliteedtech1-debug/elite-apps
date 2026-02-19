@@ -2,7 +2,44 @@
 
 > **Optimized for:** Anthropic Claude (Primary) | OpenCode (Secondary) | Google Gemini (Tertiary)
 > 
-> **Last Updated:** 2026-02-06
+> **Last Updated:** 2026-02-14
+
+---
+
+## 🗺️ Route Mapping (URL to Component Locator)
+
+**When user provides a URL like `http://localhost:3000/student/student-list`, use these files to locate the component:**
+
+### Primary Route Files:
+1. **`elscholar-ui/src/feature-module/router/all_routes.tsx`**
+   - Contains all route path constants
+   - Maps route names to URL paths
+   - Example: `studentList: "/student/student-list"`
+
+2. **`elscholar-ui/src/feature-module/router/emergency-router.tsx`**
+   - Maps URL paths to React components
+   - Shows component imports and lazy loading
+   - Example: `<Route path="/student/student-list" element={<StudentList />} />`
+
+3. **`elscholar-ui/src/feature-module/router/optimized-main-router.tsx`**
+   - Alternative router with performance optimizations
+   - Contains same route-to-component mappings
+
+### Quick Workflow:
+```bash
+# User says: "Edit http://localhost:3000/teacher/add-teacher"
+1. Search all_routes.tsx for "/teacher/add-teacher" → find route name
+2. Search emergency-router.tsx for same path → find component import
+3. Navigate to component file and make edits
+```
+
+### Example Mappings:
+| URL Path | Route Constant | Component File |
+|----------|---------------|----------------|
+| `/student/student-list` | `all_routes.studentList` | `peoples/students/student-list/index.tsx` |
+| `/teacher/add-teacher` | `all_routes.addTeacher` | `peoples/teacher/teacherForm/staffManagementForm.tsx` |
+| `/teacher/teacher-list` | `all_routes.teacherList` | `peoples/teacher/teacher-list/index.tsx` |
+| `/admin-dashboard` | `all_routes.adminDashboard` | `mainMenu/adminDashboard/index.tsx` |
 
 ---
 
@@ -11,18 +48,30 @@
 **ALL API requests MUST include these headers for proper school/branch isolation:**
 
 ```bash
--H 'X-School-Id: SCH/20'      # Current school context
--H 'X-Branch-Id: BRCH00027'   # Current branch context
+-H 'X-School-Id: SCH/20'      # Current school context (optional - validated against JWT)
+-H 'X-Branch-Id: BRCH00027'   # Current branch context (optional - for admin flexibility)
 ```
 
 **Backend Implementation Rule:**
 ```javascript
-// ALWAYS use headers as primary source, fallback to req.user
-const school_id = req.headers['x-school-id'] || req.user.school_id;
-const branch_id = req.headers['x-branch-id'] || req.user.branch_id;
+// ALWAYS use JWT token for school_id (security)
+const school_id = req.user.school_id;  // From JWT token
+
+// Validate header matches token (if provided)
+if (req.headers['x-school-id'] && req.headers['x-school-id'] !== req.user.school_id) {
+  return res.status(403).json({ 
+    success: false,
+    error: 'School ID mismatch: Cannot access different school data' 
+  });
+}
+
+// Branch ID - flexible (header > token) for admin multi-branch management
+const branch_id = req.headers['x-branch-id'] || req.user.branch_id || null;
 ```
 
 **Why This Matters:**
+- **School ID**: ALWAYS from JWT token (security - prevents cross-school access)
+- **Branch ID**: Header priority (flexibility - allows admin to switch branches without re-login)
 - Ensures correct data isolation in multi-tenant system
 - Prevents cross-school data leakage
 - Required for all CREATE, UPDATE, DELETE operations

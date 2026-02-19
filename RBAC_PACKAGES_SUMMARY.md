@@ -30,7 +30,7 @@
   - Single Billing
   - School Fees
 - **Attendance**
-  - Quick Scanner (Student Attendance)
+  - Scanner (Student Attendance)
 
 ---
 

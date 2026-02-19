@@ -1,0 +1,12 @@
+procedure_name	type	returns	created_date
+assignments	PROCEDURE	NULL	2026-01-29 12:43:17
+assignment_questions	PROCEDURE	NULL	2026-01-04 13:46:29
+GetStudentsByClassSubject	PROCEDURE	NULL	2026-01-04 13:46:32
+GetSubjectsByClass	PROCEDURE	NULL	2026-01-04 13:46:32
+lessons	PROCEDURE	NULL	2026-01-04 13:46:32
+lesson_comments	PROCEDURE	NULL	2026-01-04 13:46:32
+lesson_time_table	PROCEDURE	NULL	2026-01-04 13:46:32
+subjects	PROCEDURE	NULL	2026-01-04 13:46:35
+subject_management	PROCEDURE	NULL	2026-01-04 13:46:35
+syllabus	PROCEDURE	NULL	2026-01-04 13:46:35
+syllabusTracker	PROCEDURE	NULL	2026-01-04 13:46:35

@@ -1,0 +1,228 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    CHATBOT NAVIGATION SYSTEM - FLOW DIAGRAM                  ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 1. USER INTERACTION                                                         │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+    👤 User types: "where is student list"
+         │
+         ▼
+    ┌──────────────────┐
+    │ ChatbotWidget    │  (Frontend)
+    │ React Component  │
+    └──────────────────┘
+         │
+         │ POST /api/support/chatbot/chat
+         │ Headers: Authorization, X-School-Id, X-Branch-Id, X-User-Type
+         │ Body: { message, sessionId }
+         ▼
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 2. BACKEND PROCESSING                                                       │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+    ┌──────────────────────────┐
+    │ ChatbotController.chat() │
+    └──────────────────────────┘
+         │
+         ▼
+    ┌──────────────────────────────┐
+    │ processMessage()             │
+    │ - Normalize query            │
+    │ - Check greeting             │
+    │ - Detect navigation intent ✓ │
+    └──────────────────────────────┘
+         │
+         ▼
+    ┌────────────────────────────────────────┐
+    │ navigationService.detectNavigationIntent() │
+    │ Keywords: where is, show me, find, etc.    │
+    └────────────────────────────────────────┘
+         │
+         │ Navigation intent detected!
+         ▼
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 3. MENU FETCHING & CACHING                                                  │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+    ┌──────────────────────────────────┐
+    │ navigationService.getMenuForUser()│
+    └──────────────────────────────────┘
+         │
+         ├─── Check cache (5 min TTL)
+         │    Cache key: branchadmin_SCH/23_BRCH/29
+         │
+         ├─── Cache HIT? → Return cached menu
+         │
+         └─── Cache MISS? ↓
+              │
+              ▼
+         ┌────────────────────────────────┐
+         │ GET /api/rbac/menu?compact=true│
+         │ Headers: Auth, School, Branch  │
+         └────────────────────────────────┘
+              │
+              ▼
+         ┌────────────────────────────────┐
+         │ RBAC System                    │
+         │ - Filter by user role          │
+         │ - Apply permissions            │
+         │ - Return role-specific menu    │
+         └────────────────────────────────┘
+              │
+              ▼
+         [Menu Data Cached]
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 4. SEARCH & SCORING                                                         │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+    ┌──────────────────────────────────┐
+    │ navigationService.findNavigationPath() │
+    └──────────────────────────────────┘
+         │
+         ▼
+    For each menu section:
+      For each item:
+        For each submenu item:
+          │
+          ├─ Match query words with label
+          ├─ Match query with URL path
+          ├─ Calculate score:
+          │   • Exact match: +10 points
+          │   • Contains: +5 points
+          │   • URL match: +5 points
+          │
+          └─ Add to results array
+
+    Results:
+    ┌─────────────────────────────────────────┐
+    │ 1. Student List (Score: 25) ✓          │
+    │    Path: Personal Data Mngr → Students  │
+    │    Link: /student/student-list          │
+    ├─────────────────────────────────────────┤
+    │ 2. Class List (Score: 15)              │
+    │ 3. Staff List (Score: 15)              │
+    │ 4. ID Card Generator (Score: 0)        │
+    └─────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 5. RESPONSE GENERATION                                                      │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+    ┌──────────────────────────────────────────┐
+    │ navigationService.generateNavigationResponse() │
+    └──────────────────────────────────────────┘
+         │
+         ▼
+    Format response:
+    ┌─────────────────────────────────────────┐
+    │ To access **Student List**, navigate:   │
+    │                                          │
+    │ 📍 Personal Data Mngr → Students →      │
+    │    Student List                          │
+    │                                          │
+    │ **Other related pages:**                 │
+    │ 2. Class List (Personal Data Mngr)      │
+    │ 3. Staff List (Personal Data Mngr)      │
+    └─────────────────────────────────────────┘
+
+    Return to controller:
+    {
+      text: "To access **Student List**...",
+      intent: "navigation",
+      confidence: 0.9,
+      primaryLink: "/student/student-list",
+      navigationResults: [...]
+    }
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 6. FRONTEND RENDERING                                                       │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+    ┌──────────────────────────┐
+    │ ChatbotWidget receives   │
+    │ response from backend    │
+    └──────────────────────────┘
+         │
+         ▼
+    ┌──────────────────────────────────────┐
+    │ Render message with:                 │
+    │ • Formatted text (pre-wrap)          │
+    │ • Navigation path with → arrows      │
+    │ • Blue "Go to Page" button           │
+    │ • Related pages list                 │
+    └──────────────────────────────────────┘
+         │
+         ▼
+    ┌─────────────────────────────────────────────────┐
+    │  🤖 Bot Message                                 │
+    │  ┌───────────────────────────────────────────┐ │
+    │  │ To access **Student List**, navigate:     │ │
+    │  │                                            │ │
+    │  │ 📍 Personal Data Mngr → Students →        │ │
+    │  │    Student List                            │ │
+    │  │                                            │ │
+    │  │ **Other related pages:**                   │ │
+    │  │ 2. Class List (Personal Data Mngr)        │ │
+    │  │ 3. Staff List (Personal Data Mngr)        │ │
+    │  │                                            │ │
+    │  │  ┌──────────────────┐                     │ │
+    │  │  │ 🔗 Go to Page    │ ← Clickable button  │ │
+    │  │  └──────────────────┘                     │ │
+    │  └───────────────────────────────────────────┘ │
+    │  90% confidence                                │
+    └─────────────────────────────────────────────────┘
+         │
+         │ User clicks button
+         ▼
+    ┌──────────────────────────┐
+    │ Navigate to:             │
+    │ /student/student-list    │
+    └──────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 7. CONVERSATION LOGGING                                                     │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+    ┌──────────────────────────────────┐
+    │ ChatbotConversation.create()     │
+    └──────────────────────────────────┘
+         │
+         ▼
+    Database Record:
+    ┌─────────────────────────────────────────┐
+    │ sessionId: "abc-123"                    │
+    │ userId: 1208                            │
+    │ userMessage: "where is student list"    │
+    │ botResponse: "To access **Student..."   │
+    │ intent: "navigation"                    │
+    │ confidence: 0.9                         │
+    │ escalatedToHuman: false                 │
+    │ createdAt: 2026-02-10 14:47:49         │
+    └─────────────────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════════════════════
+
+KEY COMPONENTS:
+
+📱 Frontend:  ChatbotWidget.tsx
+🔧 Backend:   ChatbotController.js
+🧭 Service:   navigationService.js
+🔐 RBAC:      /api/rbac/menu
+💾 Cache:     In-memory (5 min TTL)
+📊 Database:  chatbot_conversations
+
+═══════════════════════════════════════════════════════════════════════════════
+
+PERFORMANCE:
+
+⚡ First request:  ~200ms (fetch menu + search)
+⚡ Cached request: ~50ms (search only)
+⚡ Cache TTL:      5 minutes
+⚡ Max results:    5 per query
+
+═══════════════════════════════════════════════════════════════════════════════

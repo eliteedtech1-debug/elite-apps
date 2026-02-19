@@ -1,0 +1,1679 @@
+const db = require('../models');
+const { PaymentEntry, SchoolRevenue } = db;
+const { Op } = require('sequelize');
+const moment = require('moment');
+
+/**
+ * ORM-BASED PAYMENTS CONTROLLER
+ * 
+ * This controller replaces stored procedures with ORM operations for:
+ * - Payment entries management
+ * - School revenues management
+ * - Student balance calculations
+ * - Payment reporting
+ * 
+ * Benefits:
+ * - AI-friendly code that's easy to understand and modify
+ * - Type safety and validation
+ * - Better error handling
+ * - Easier testing and debugging
+ * - No stored procedure dependencies
+ */
+
+class ORMPaymentsController {
+
+  constructor() {
+    this.generateRefNo = this.generateRefNo.bind(this);
+    this.createPaymentEntryWithEnhancedAccounting = this.createPaymentEntryWithEnhancedAccounting.bind(this);
+    this.createPaymentEntry = this.createPaymentEntry.bind(this);
+    this.getStudentPayments = this.getStudentPayments.bind(this);
+    this.getStudentPaymentDetails = this.getStudentPaymentDetails.bind(this);
+    this.getClassBills = this.getClassBills.bind(this);
+    this.getClassBillsAggregated = this.getClassBillsAggregated.bind(this);
+    this.getStudentBalance = this.getStudentBalance.bind(this);
+    this.recordPayment = this.recordPayment.bind(this);
+    this.updatePaymentEntry = this.updatePaymentEntry.bind(this);
+    this.deletePaymentEntry = this.deletePaymentEntry.bind(this);
+    this.copyBillsToStudents = this.copyBillsToStudents.bind(this);
+    this.handleConditionalQuery = this.handleConditionalQuery.bind(this);
+    this.getPaymentReports = this.getPaymentReports.bind(this);
+    
+    // Your existing initialization
+    
+  }
+
+  /**
+   * GENERATE REFERENCE NUMBER
+   */
+  generateRefNo() {
+    let refNo = moment().format("YYmmSS");
+    refNo = refNo + `${Math.floor(10 + Math.random() * 9)}`;
+    return refNo;
+  }
+
+  /**
+   * CREATE PAYMENT ENTRY WITH ENHANCED ACCOUNTING
+   * Replaces: CALL manage_payments_enhanced('create-with-enhanced-accounting', ...)
+   * Handles complex accounting scenarios with journal entries and accounting summaries
+   */
+  async createPaymentEntryWithEnhancedAccounting(req, res) {
+    const transaction = await db.sequelize.transaction();
+    
+    try {
+      const {
+        admission_no,
+        class_name,
+        class_code,
+        academic_year,
+        term,
+        branch_id,
+        school_id,
+        created_by,
+        bill_items = [],
+        journal_entries = [],
+        accounting_summary = {}
+      } = req.body;
+
+      // Validate required fields
+      if (!admission_no || !bill_items.length) {
+        return res.status(400).json({
+          success: false,
+          message: 'Missing required fields: admission_no, bill_items'
+        });
+      }
+
+      // Validate accounting data follows proper standards
+      if (journal_entries.length > 0) {
+        const totalDebits = journal_entries.reduce((sum, entry) => sum + (entry.debit || 0), 0);
+        const totalCredits = journal_entries.reduce((sum, entry) => sum + (entry.credit || 0), 0);
+        const difference = Math.abs(totalDebits - totalCredits);
+        
+        if (difference > 0.01) {
+          return res.status(400).json({
+            success: false,
+            message: `Journal entries do not balance according to double-entry bookkeeping principles. Debits: ₦${totalDebits.toLocaleString()}, Credits: ₦${totalCredits.toLocaleString()}, Difference: ₦${difference.toLocaleString()}`,
+            system: 'ORM'
+          });
+        }
+        
+        // Validate journal entry structure
+        for (let i = 0; i < journal_entries.length; i++) {
+          const entry = journal_entries[i];
+          if (!entry.account || !entry.account_code || !entry.accountType || !entry.description) {
+            return res.status(400).json({
+              success: false,
+              message: `Journal entry ${i + 1} is missing required fields (account, account_code, accountType, description)`,
+              system: 'ORM'
+            });
+          }
+          
+          if (!['Asset', 'Liability', 'Equity', 'Revenue', 'Expense'].includes(entry.accountType)) {
+            return res.status(400).json({
+              success: false,
+              message: `Journal entry ${i + 1} has invalid account type: ${entry.accountType}`,
+              system: 'ORM'
+            });
+          }
+          
+          const debitAmount = entry.debit || 0;
+          const creditAmount = entry.credit || 0;
+          
+          if (debitAmount === 0 && creditAmount === 0) {
+            return res.status(400).json({
+              success: false,
+              message: `Journal entry ${i + 1} must have either debit or credit amount greater than 0`,
+              system: 'ORM'
+            });
+          }
+          
+          if (debitAmount > 0 && creditAmount > 0) {
+            return res.status(400).json({
+              success: false,
+              message: `Journal entry ${i + 1} cannot have both debit and credit amounts`,
+              system: 'ORM'
+            });
+          }
+          
+          if (debitAmount < 0 || creditAmount < 0) {
+            return res.status(400).json({
+              success: false,
+              message: `Journal entry ${i + 1} cannot have negative amounts`,
+              system: 'ORM'
+            });
+          }
+        }
+      }
+
+      console.log('🔧 ORM: Creating payment entries with enhanced accounting (validation passed):', {
+        admission_no,
+        bill_items_count: bill_items.length,
+        journal_entries_count: journal_entries.length,
+        accounting_summary,
+        validation_status: 'PASSED'
+      });
+
+      const createdEntries = [];
+      let totalAmount = 0;
+
+      // Create payment entries for each bill item
+      for (const item of bill_items) {
+        const ref_no = this.generateRefNo();
+        const netAmount = parseFloat(item.netAmount || item.baseAmount * item.quantity);
+        totalAmount += netAmount;
+
+        // Prepare payment entry data with only existing database columns
+        const paymentEntryData = {
+          ref_no,
+          admission_no,
+          class_code: class_code || class_name,
+          academic_year,
+          term,
+          cr: netAmount,
+          dr: 0,
+          description: item.description,
+          quantity: item.quantity || 1,
+          item_category: item.item_category || 'CUSTOM_ITEM',
+          payment_mode: 'Invoice',
+          payment_status: 'Pending',
+          school_id: school_id || req.user.school_id,
+          branch_id: branch_id || req.user.branch_id,
+          created_by
+        };
+
+        // Note: Additional accounting fields (account_type, debit_account, credit_account, 
+        // discount, fines, accounting_category, journal_reference) are stored in 
+        // separate accounting tables (journal_entries, accounting_summaries) for 
+        // proper accounting standards compliance
+
+        const paymentEntry = await PaymentEntry.create(paymentEntryData, { transaction });
+
+        createdEntries.push(paymentEntry);
+      }
+
+      // Create journal entries if provided
+      if (journal_entries.length > 0) {
+        for (const entry of journal_entries) {
+          // Create journal entry record (assuming you have a JournalEntry model)
+          // If not, you can store this in a separate accounting table
+          await db.sequelize.query(
+            `INSERT INTO journal_entries 
+             (account, account_code, account_type, debit, credit, description, 
+              reference, transaction_date, school_id, branch_id, student_id, created_by) 
+             VALUES (?, ?, ?, ?, ?, ?, ?, CURDATE(), ?, ?, ?, ?)`,
+            {
+              replacements: [
+                entry.account,
+                entry.account_code,
+                entry.accountType,
+                entry.debit || 0,
+                entry.credit || 0,
+                entry.description,
+                `${admission_no}-${academic_year}-${term}`,
+                school_id || req.user.school_id,
+                branch_id || req.user.branch_id,
+                admission_no,
+                req.user.user_id || 1
+              ],
+              transaction
+            }
+          );
+        }
+      }
+
+      // Store comprehensive accounting summary with validation
+      if (Object.keys(accounting_summary).length > 0) {
+        // Validate accounting summary data
+        const requiredFields = ['total_receivable_increase', 'total_receivable_decrease', 'total_revenue', 'total_expenses', 'net_receivable_impact'];
+        const missingFields = requiredFields.filter(field => accounting_summary[field] === undefined);
+        
+        if (missingFields.length > 0) {
+          console.warn('⚠️ ORM: Missing accounting summary fields:', missingFields);
+        }
+        
+        await db.sequelize.query(
+          `INSERT INTO accounting_summaries 
+           (reference_type, reference_id, admission_no, academic_year, term,
+            total_receivable_increase, total_receivable_decrease, 
+            total_revenue, total_expenses, net_receivable_impact,
+            total_debits, total_credits, is_balanced,
+            school_id, branch_id, created_by, created_at) 
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
+          {
+            replacements: [
+              'CUSTOM_BILL_ITEMS',
+              admission_no,
+              admission_no,
+              academic_year,
+              term,
+              accounting_summary.total_receivable_increase || 0,
+              accounting_summary.total_receivable_decrease || 0,
+              accounting_summary.total_revenue || 0,
+              accounting_summary.total_expenses || 0,
+              accounting_summary.net_receivable_impact || 0,
+              accounting_summary.total_debits || 0,
+              accounting_summary.total_credits || 0,
+              accounting_summary.is_balanced ? 1 : 0,
+              school_id || req.user.school_id,
+              branch_id || req.user.branch_id,
+              created_by
+            ],
+            transaction
+          }
+        );
+      }
+
+      await transaction.commit();
+
+      console.log('✅ ORM: Successfully created payment entries with enhanced accounting :', {
+        entries_created: createdEntries.length,
+        total_amount: totalAmount,
+        journal_entries_created: journal_entries.length,
+        accounting_summary_stored: Object.keys(accounting_summary).length > 0,
+        double_entry_validated: true,
+        accounting_standards: 'GAAP_COMPLIANT'
+      });
+
+      res.json({
+        success: true,
+        message: `Successfully created ${createdEntries.length} payment entries with enhanced accounting`,
+        data: {
+          admission_no,
+          entries_created: createdEntries.length,
+          total_amount: totalAmount,
+          journal_entries_created: journal_entries.length,
+          accounting_summary: accounting_summary,
+          accounting_compliance: {
+            double_entry_bookkeeping: true,
+            gaap_compliant: true,
+            balanced_entries: true,
+            audit_trail_complete: true
+          },
+          payment_entries: createdEntries.map(entry => ({
+            item_id: entry.item_id,
+            ref_no: entry.ref_no,
+            description: entry.description,
+            amount: entry.cr,
+            payment_status: entry.payment_status,
+            created_at: entry.created_at
+          }))
+        },
+        system: 'ORM'
+      });
+
+    } catch (error) {
+      await transaction.rollback();
+      console.error('❌ ORM Error creating payment entry with enhanced accounting:', error);
+      
+      // Provide detailed error information for accounting issues
+      const errorMessage = error.message.includes('Journal entries') || error.message.includes('accounting') 
+        ? error.message 
+        : 'Failed to create payment entry with enhanced accounting';
+      
+      res.status(500).json({
+        success: false,
+        message: errorMessage,
+        error: error.message,
+        system: 'ORM',
+        accounting_error: true,
+        debug: {
+          transaction_rolled_back: true,
+          data_integrity_maintained: true
+        }
+      });
+    }
+  }
+
+  /**
+   * CREATE PAYMENT ENTRY (Simple)
+   * Replaces: CALL manage_payments_enhanced('create', ...)
+   */
+  async createPaymentEntry(req, res) {
+    const transaction = await db.sequelize.transaction();
+    
+    try {
+      const {
+        admission_no,
+        class_code,
+        academic_year,
+        term,
+        description,
+        amount,
+        netAmount,
+        quantity = 1,
+        item_category = 'STANDARD_FEE',
+        payment_mode = 'Cash',
+        branch_id,
+        created_by
+      } = req.body;
+
+      // Validate required fields
+      if (!admission_no || (!amount && !netAmount)|| !description) {
+        return res.status(400).json({
+          success: false,
+          message: 'Missing required fields: admission_no, amount, description'
+        });
+      }
+
+      const ref_no = this.generateRefNo();
+      const netAmount1 = parseFloat(amount) * parseInt(quantity);
+
+      // Create payment entry using ORM
+      const paymentEntry = await PaymentEntry.create({
+        ref_no,
+        admission_no,
+        class_code,
+        academic_year,
+        term,
+        cr: netAmount??netAmount1,
+        dr: 0,
+        description,
+        quantity,
+        item_category,
+        payment_mode,
+        payment_status: 'Pending',
+        school_id: req.user.school_id,
+        branch_id: branch_id || req.user.branch_id,
+        created_by
+      }, { transaction });
+
+      await transaction.commit();
+
+      res.json({
+        success: true,
+        message: 'Payment entry created successfully',
+        data: {
+          item_id: paymentEntry.item_id,
+          ref_no: paymentEntry.ref_no,
+          admission_no: paymentEntry.admission_no,
+          amount: netAmount,
+          description: paymentEntry.description,
+          balance: paymentEntry.getBalance()
+        }
+      });
+
+    } catch (error) {
+      await transaction.rollback();
+      console.error('Error creating payment entry:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to create payment entry',
+        error: error.message
+      });
+    }
+  }
+
+  /**
+   * GET STUDENT PAYMENTS
+   * Replaces: CALL manage_payments_enhanced('select-student', ...)
+   */
+  async getStudentPayments(req, res) {
+    try {
+      const {
+        admission_no,
+        academic_year,
+        term,
+        payment_status,
+        limit = 50,
+        offset = 0
+      } = req.query;
+
+      // Check authentication
+      if (!req.user || !req.user.school_id) {
+        return res.status(401).json({
+          success: false,
+          message: 'Authentication required. Please ensure you are logged in and have a valid JWT token.',
+          error: 'Missing or invalid user authentication',
+          system: 'ORM'
+        });
+      }
+
+      if (!admission_no) {
+        return res.status(400).json({
+          success: false,
+          message: 'admission_no is required'
+        });
+      }
+
+      const where = {
+        admission_no,
+        school_id: req.user.school_id,
+        // ✅ FIXED: Exclude items with payment_status='Excluded'
+        payment_status: { [Op.ne]: 'Excluded' }
+      };
+
+      if (academic_year) where.academic_year = academic_year;
+      if (term) where.term = term;
+      if (payment_status) where.payment_status = payment_status;
+
+      const payments = await PaymentEntry.findAll({
+        where,
+        order: [['created_at', 'DESC']],
+        limit: parseInt(limit),
+        offset: parseInt(offset)
+      });
+
+      // Calculate totals
+      const totals = payments.reduce((acc, payment) => {
+        acc.total_cr += parseFloat(payment.cr || 0);
+        acc.total_dr += parseFloat(payment.dr || 0);
+        acc.balance += payment.getBalance();
+        return acc;
+      }, { total_cr: 0, total_dr: 0, balance: 0 });
+
+      res.json({
+        success: true,
+        message: 'Student payments retrieved successfully',
+        data: {
+          payments: payments.map(p => ({
+            item_id: p.item_id,
+            ref_no: p.ref_no,
+            admission_no: p.admission_no,
+            class_code: p.class_code,
+            academic_year: p.academic_year,
+            term: p.term,
+            cr: p.cr,
+            dr: p.dr,
+            balance: p.getBalance(),
+            description: p.description,
+            quantity: p.quantity,
+            item_category: p.item_category,
+            payment_status: p.payment_status,
+            created_at: p.created_at
+          })),
+          totals,
+          count: payments.length
+        }
+      });
+
+    } catch (error) {
+      console.error('Error getting student payments:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to get student payments',
+        error: error.message
+      });
+    }
+  }
+
+  /**
+   * GET STUDENT PAYMENT DETAILS (For Frontend Components)
+   * Replaces: POST /payments with query_type: "select-revenues"
+   * Returns detailed payment items for a student in the format expected by frontend components
+   */
+  async getStudentPaymentDetails(req, res) {
+    try {
+      const {
+        admission_no,
+        class_code,
+        academic_year,
+        term,
+        school_id,
+        limit = 100,
+        offset = 0
+      } = req.query;
+
+      // Check authentication
+      if (!req.user || !req.user.school_id) {
+        return res.status(401).json({
+          success: false,
+          message: 'Authentication required. Please ensure you are logged in and have a valid JWT token.',
+          error: 'Missing or invalid user authentication',
+          system: 'ORM'
+        });
+      }
+
+      if (!admission_no) {
+        return res.status(400).json({
+          success: false,
+          message: 'admission_no is required for detailed payment information'
+        });
+      }
+
+      console.log('🔍 ORM: Getting detailed payment information for student:', {
+        admission_no,
+        class_code,
+        academic_year,
+        term,
+        school_id: req.user.school_id
+      });
+
+      const where = {
+        admission_no,
+        school_id: req.user.school_id,
+        // ✅ CRITICAL: Exclude items with payment_status='Excluded' from all queries
+        payment_status: { [Op.ne]: 'Excluded' }
+      };
+
+      // Add optional filters
+      if (class_code) where.class_code = class_code;
+      if (academic_year) where.academic_year = academic_year;
+      if (term) where.term = term;
+
+      const payments = await PaymentEntry.findAll({
+        where,
+        order: [['created_at', 'DESC']],
+        limit: parseInt(limit),
+        offset: parseInt(offset)
+      });
+
+      console.log(`✅ ORM: Found ${payments.length} payment items for student ${admission_no} (excluding items with payment_status='Excluded')`);
+
+      // Transform to match frontend expectations (similar to legacy select-revenues format)
+      const transformedPayments = payments.map(payment => ({
+        id: payment.item_id,
+        item_id: payment.item_id,
+        ref_no: payment.ref_no,
+        admission_no: payment.admission_no,
+        class_code: payment.class_code,
+        academic_year: payment.academic_year,
+        term: payment.term,
+        cr: parseFloat(payment.cr || 0),
+        dr: parseFloat(payment.dr || 0),
+        amount: parseFloat(payment.cr || 0), // For backward compatibility
+        description: payment.description,
+        quantity: parseInt(payment.quantity || 1),
+        item_category: payment.item_category,
+        payment_mode: payment.payment_mode,
+        payment_status: payment.payment_status,
+        is_optional: payment.payment_status === 'Pending' ? 'Yes' : 'No',
+        student_type: 'Regular', // Default value for compatibility
+        status: payment.payment_status,
+        code: payment.item_id, // For frontend compatibility
+        created_at: payment.created_at,
+        created_by: payment.created_by
+      }));
+
+      // Calculate summary totals
+      const summary = {
+        total_items: transformedPayments.length,
+        total_amount: transformedPayments.reduce((sum, p) => sum + p.cr, 0),
+        total_paid: transformedPayments.reduce((sum, p) => sum + p.dr, 0),
+        outstanding_balance: transformedPayments.reduce((sum, p) => sum + (p.cr - p.dr), 0),
+        pending_items: transformedPayments.filter(p => p.payment_status === 'Pending').length,
+        paid_items: transformedPayments.filter(p => p.payment_status === 'Paid').length
+      };
+
+      res.json({
+        success: true,
+        message: `Retrieved ${transformedPayments.length} detailed payment items for student ${admission_no} (excluding items with payment_status='Excluded')`,
+        data: transformedPayments,
+        summary,
+        query_type: 'select-student-detailed',
+        system: 'ORM',
+        debug: {
+          admission_no,
+          class_code,
+          academic_year,
+          term,
+          school_id: req.user.school_id,
+          excluded_items_filtered: true
+        }
+      });
+
+    } catch (error) {
+      console.error('❌ ORM Error getting detailed student payments:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to get detailed student payment information',
+        error: error.message,
+        system: 'ORM'
+      });
+    }
+  }
+
+  /**
+   * GET CLASS BILLS (Individual Entries)
+   * Replaces: CALL manage_payments_enhanced('select-bills', ...)
+   */
+  async getClassBills(req, res) {
+    try {
+      const {
+        class_code,
+        academic_year,
+        term,
+        payment_status,
+        limit = 100,
+        offset = 0
+      } = req.query;
+
+      // Check authentication
+      if (!req.user || !req.user.school_id) {
+        return res.status(401).json({
+          success: false,
+          message: 'Authentication required. Please ensure you are logged in and have a valid JWT token.',
+          error: 'Missing or invalid user authentication',
+          system: 'ORM'
+        });
+      }
+
+      if (!class_code) {
+        return res.status(400).json({
+          success: false,
+          message: 'class_code is required'
+        });
+      }
+
+      const where = {
+        class_code,
+        school_id: req.user.school_id,
+        // ✅ FIXED: Exclude items with payment_status='Excluded'
+        payment_status: { [Op.ne]: 'Excluded' }
+      };
+
+      if (academic_year) where.academic_year = academic_year;
+      if (term) where.term = term;
+      if (payment_status) where.payment_status = payment_status;
+
+      const bills = await PaymentEntry.findAll({
+        where,
+        order: [['admission_no', 'ASC'], ['created_at', 'DESC']],
+        limit: parseInt(limit),
+        offset: parseInt(offset)
+      });
+
+      // Group by student
+      const studentBills = bills.reduce((acc, bill) => {
+        if (!acc[bill.admission_no]) {
+          acc[bill.admission_no] = {
+            admission_no: bill.admission_no,
+            class_code: bill.class_code,
+            payments: [],
+            total_balance: 0
+          };
+        }
+        acc[bill.admission_no].payments.push(bill);
+        acc[bill.admission_no].total_balance += bill.getBalance();
+        return acc;
+      }, {});
+
+      res.json({
+        success: true,
+        message: 'Class bills retrieved successfully',
+        data: {
+          class_code,
+          academic_year,
+          term,
+          students: Object.values(studentBills),
+          total_students: Object.keys(studentBills).length,
+          total_bills: bills.length
+        },
+        system: 'ORM'
+      });
+
+    } catch (error) {
+      console.error('Error getting class bills:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to get class bills',
+        error: error.message
+      });
+    }
+  }
+
+  /**
+   * GET CLASS BILLS AGGREGATED (For BillClasses Component)
+   * Replaces: CALL manage_payments_enhanced('select-bills', ...) with aggregation
+   * Returns student-level aggregated data compatible with BillClasses.tsx
+   */
+  async getClassBillsAggregated(req, res) {
+    try {
+      const {
+        class_code,
+        academic_year,
+        term,
+        branch_id,
+        limit = 100,
+        offset = 0
+      } = req.query;
+
+      // Check authentication
+      if (!req.user || !req.user.school_id) {
+        return res.status(401).json({
+          success: false,
+          message: 'Authentication required. Please ensure you are logged in and have a valid JWT token.',
+          error: 'Missing or invalid user authentication',
+          system: 'ORM'
+        });
+      }
+
+      if (!class_code) {
+        return res.status(400).json({
+          success: false,
+          message: 'class_code is required'
+        });
+      }
+
+      console.log('🔍 ORM: Getting aggregated class bills for:', {
+        class_code,
+        academic_year,
+        term,
+        school_id: req.user.school_id,
+        user_authenticated: true
+      });
+
+      // Use raw SQL query for complex aggregation (ORM-friendly approach) invoice_count
+      // ✅ FIXED: Completely exclude items with payment_status='Excluded' from JOIN and all calculations
+    const sql = `
+  SELECT
+    s.admission_no,
+    s.student_name,
+    s.current_class AS class_name,
+    COALESCE(pe.term, :term) AS term,
+    COALESCE(pe.academic_year, :academic_year) AS academic_year,
+
+    COUNT(CASE WHEN pe.payment_status != 'Excluded' THEN pe.item_id END) AS invoice_count,
+    COALESCE(SUM(CASE WHEN pe.payment_status != 'Excluded' THEN pe.cr END), 0) AS total_invoice,
+    COALESCE(SUM(CASE WHEN pe.payment_status != 'Excluded' THEN pe.dr END), 0) AS total_paid,
+    COALESCE(SUM(CASE WHEN pe.payment_status != 'Excluded' THEN pe.cr END), 0) 
+      - COALESCE(SUM(CASE WHEN pe.payment_status != 'Excluded' THEN pe.dr END), 0) AS balance,
+
+    CASE
+      WHEN COALESCE(SUM(CASE WHEN pe.payment_status != 'Excluded' THEN pe.cr END), 0)
+         - COALESCE(SUM(CASE WHEN pe.payment_status != 'Excluded' THEN pe.dr END), 0) <= 0
+        THEN 'Paid'
+      WHEN COALESCE(SUM(CASE WHEN pe.payment_status != 'Excluded' THEN pe.dr END), 0) > 0
+        THEN 'Partial'
+      ELSE 'Unpaid'
+    END AS payment_status,
+
+    MAX(pe.created_at) AS last_transaction_date,
+    COUNT(CASE WHEN pe.payment_status = 'Paid' THEN 1 END) AS confirmed_payments,
+    COUNT(CASE WHEN pe.payment_status = 'Pending' THEN 1 END) AS pending_payments
+
+  FROM students s
+  LEFT JOIN payment_entries pe
+    ON s.admission_no = pe.admission_no
+    ${term ? 'AND pe.term = :term' : ''}
+    ${academic_year ? 'AND pe.academic_year = :academic_year' : ''}
+    AND pe.school_id = :school_id
+    ${branch_id ? 'AND pe.branch_id = :branch_id' : ''}
+
+  WHERE
+    s.current_class = :class_code
+    AND s.school_id = :school_id
+    ${branch_id ? 'AND s.branch_id = :branch_id' : ''}
+    AND s.status != 'Deleted'
+
+  GROUP BY
+    s.admission_no,
+    s.student_name,
+    s.current_class
+
+  ORDER BY s.student_name ASC
+  LIMIT :limit OFFSET :offset
+`;
+
+      const replacements = {
+        class_code,
+        school_id: req.user.school_id,
+        term: term || null,
+        academic_year: academic_year || null,
+        limit: parseInt(limit) || 100,
+        offset: parseInt(offset) || 0
+      };
+
+      if (branch_id) {
+        replacements.branch_id = branch_id;
+      }
+
+      const result = await db.sequelize.query(sql, {
+        replacements,
+        type: db.sequelize.QueryTypes.SELECT
+      });
+
+      console.log(`✅ ORM: Found ${result.length} students with aggregated billing data (excluding items with payment_status='Excluded')`);
+
+      // Calculate summary statistics (already excluding 'Excluded' items from the SQL query)
+      const summary = {
+        total_students: result.length,
+        billed_students: result.filter(s => s.invoice_count > 0).length,
+        unbilled_students: result.filter(s => s.invoice_count === 0).length,
+        total_amount: result.reduce((sum, s) => sum + parseFloat(s.total_invoice || 0), 0),
+        total_paid: result.reduce((sum, s) => sum + parseFloat(s.total_paid || 0), 0),
+        outstanding_balance: result.reduce((sum, s) => sum + parseFloat(s.balance || 0), 0)
+      };
+
+      res.json({
+        success: true,
+        message: `Retrieved ${result.length} students from class ${class_code} (excluding items with payment_status='Excluded')`,
+        data: result,
+        summary,
+        query_type: 'select-bills-aggregated',
+        system: 'ORM',
+        debug: {
+          class_code,
+          term,
+          academic_year,
+          school_id: req.user.school_id,
+          branch_id,
+          sql_executed: true
+        }
+      });
+
+    } catch (error) {
+      console.error('❌ ORM Error getting aggregated class bills:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to get aggregated class bills',
+        error: error.message,
+        system: 'ORM'
+      });
+    }
+  }
+
+  /**
+   * GET STUDENT BALANCE
+   * Replaces: CALL manage_payments_enhanced('balance', ...)
+   */
+  async getStudentBalance(req, res) {
+    try {
+      const { admission_no, academic_year, term } = req.query;
+
+      if (!admission_no) {
+        return res.status(400).json({
+          success: false,
+          message: 'admission_no is required'
+        });
+      }
+
+      const where = {
+        admission_no,
+        school_id: req.user.school_id,
+        // ✅ FIXED: Exclude items with payment_status='Excluded'
+        payment_status: { [Op.ne]: 'Excluded' }
+      };
+
+      if (academic_year) where.academic_year = academic_year;
+      if (term) where.term = term;
+
+      const payments = await PaymentEntry.findAll({
+        where,
+        attributes: [
+          [db.sequelize.fn('SUM', db.sequelize.col('cr')), 'total_cr'],
+          [db.sequelize.fn('SUM', db.sequelize.col('dr')), 'total_dr'],
+          [db.sequelize.fn('COUNT', db.sequelize.col('item_id')), 'total_entries']
+        ],
+        raw: true
+      });
+
+      const totalCr = parseFloat(payments[0]?.total_cr || 0);
+      const totalDr = parseFloat(payments[0]?.total_dr || 0);
+      const balance = totalCr - totalDr;
+      const totalEntries = parseInt(payments[0]?.total_entries || 0);
+
+      res.json({
+        success: true,
+        message: 'Student balance retrieved successfully',
+        data: {
+          admission_no,
+          academic_year,
+          term,
+          total_charges: totalCr,
+          total_payments: totalDr,
+          outstanding_balance: balance,
+          total_entries: totalEntries
+        }
+      });
+
+    } catch (error) {
+      console.error('Error getting student balance:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to get student balance',
+        error: error.message
+      });
+    }
+  }
+
+  /**
+   * RECORD PAYMENT
+   * Replaces: CALL manage_payments_enhanced('pay', ...)
+   */
+  async recordPayment(req, res) {
+    const transaction = await db.sequelize.transaction();
+    
+    try {
+      const {
+        admission_no,
+        class_code,
+        academic_year,
+        term,
+        amount,
+        description = 'Payment',
+        payment_mode = 'Cash',
+        ref_no,
+        created_by
+      } = req.body;
+
+      if (!admission_no || !amount) {
+        return res.status(400).json({
+          success: false,
+          message: 'Missing required fields: admission_no, amount'
+        });
+      }
+
+      const paymentRefNo = ref_no || this.generateRefNo();
+      const paymentAmount = parseFloat(amount);
+
+      // Create payment record (debit entry)
+      const payment = await PaymentEntry.create({
+        ref_no: paymentRefNo,
+        admission_no,
+        class_code,
+        academic_year,
+        term,
+        cr: 0,
+        dr: paymentAmount,
+        description,
+        quantity: 1,
+        item_category: 'PAYMENT',
+        payment_mode,
+        payment_status: 'Paid',
+        school_id: req.user.school_id,
+        branch_id: req.user.branch_id,
+        created_by
+      }, { transaction });
+
+      await transaction.commit();
+
+      res.json({
+        success: true,
+        message: 'Payment recorded successfully',
+        data: {
+          item_id: payment.item_id,
+          ref_no: payment.ref_no,
+          admission_no: payment.admission_no,
+          amount: paymentAmount,
+          description: payment.description,
+          payment_mode: payment.payment_mode
+        }
+      });
+
+    } catch (error) {
+      await transaction.rollback();
+      console.error('Error recording payment:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to record payment',
+        error: error.message
+      });
+    }
+  }
+
+  /**
+   * UPDATE PAYMENT ENTRY
+   * Replaces: CALL manage_payments_enhanced('update', ...)
+   */
+  async updatePaymentEntry(req, res) {
+    const transaction = await db.sequelize.transaction();
+    
+    try {
+      const { id } = req.params;
+      const {
+        description,
+        amount,
+        quantity,
+        payment_status
+      } = req.body;
+
+      const payment = await PaymentEntry.findOne({
+        where: {
+          item_id: id,
+          school_id: req.user.school_id
+        }
+      });
+
+      if (!payment) {
+        return res.status(404).json({
+          success: false,
+          message: 'Payment entry not found'
+        });
+      }
+
+      const updateData = {};
+      if (description) updateData.description = description;
+      if (amount) updateData.cr = parseFloat(amount) * (quantity || payment.quantity);
+      if (quantity) updateData.quantity = parseInt(quantity);
+      if (payment_status) updateData.payment_status = payment_status;
+
+      await payment.update(updateData, { transaction });
+      await transaction.commit();
+
+      res.json({
+        success: true,
+        message: 'Payment entry updated successfully',
+        data: {
+          item_id: payment.item_id,
+          ref_no: payment.ref_no,
+          admission_no: payment.admission_no,
+          amount: payment.cr,
+          description: payment.description,
+          balance: payment.getBalance()
+        }
+      });
+
+    } catch (error) {
+      await transaction.rollback();
+      console.error('Error updating payment entry:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to update payment entry',
+        error: error.message
+      });
+    }
+  }
+
+  /**
+   * DELETE PAYMENT ENTRY
+   * Replaces: CALL manage_payments_enhanced('delete', ...)
+   */
+  async deletePaymentEntry(req, res) {
+    const transaction = await db.sequelize.transaction();
+    
+    try {
+      const { id } = req.params;
+
+      const payment = await PaymentEntry.findOne({
+        where: {
+          item_id: id,
+          school_id: req.user.school_id
+        }
+      });
+
+      if (!payment) {
+        return res.status(404).json({
+          success: false,
+          message: 'Payment entry not found'
+        });
+      }
+
+      // Soft delete by updating status
+      await payment.update({
+        payment_status: 'Cancelled'
+      }, { transaction });
+
+      await transaction.commit();
+
+      res.json({
+        success: true,
+        message: 'Payment entry deleted successfully',
+        data: {
+          item_id: payment.item_id,
+          ref_no: payment.ref_no,
+          status: 'Cancelled'
+        }
+      });
+
+    } catch (error) {
+      await transaction.rollback();
+      console.error('Error deleting payment entry:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to delete payment entry',
+        error: error.message
+      });
+    }
+  }
+
+  /**
+   * COPY BILLS TO STUDENTS
+   * Replaces complex procedure logic with ORM operations
+   */
+  async copyBillsToStudents(req, res) {
+    const transaction = await db.sequelize.transaction();
+    
+    try {
+      const {
+        source_class_code,
+        target_students, // Array of admission numbers
+        academic_year,
+        term,
+        created_by,
+        replace_existing = false
+      } = req.body;
+
+      if (!source_class_code || !target_students || !target_students.length) {
+        return res.status(400).json({
+          success: false,
+          message: 'Missing required fields: source_class_code, target_students'
+        });
+      }
+
+      // Get source bills
+      const sourceBills = await PaymentEntry.findAll({
+        where: {
+          class_code: source_class_code,
+          academic_year,
+          term,
+          school_id: req.user.school_id,
+          payment_status: 'Pending'
+        }
+      });
+
+      if (sourceBills.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: 'No source bills found'
+        });
+      }
+
+      const copiedBills = [];
+
+      for (const admission_no of target_students) {
+        // If replace_existing, mark existing bills as excluded
+        if (replace_existing) {
+          await PaymentEntry.update(
+            { payment_status: 'Excluded' },
+            {
+              where: {
+                admission_no,
+                academic_year,
+                term,
+                school_id: req.user.school_id,
+                payment_status: 'Pending'
+              }
+            }
+          );
+        }
+
+        // Copy each source bill to target student
+        for (const sourceBill of sourceBills) {
+          const newBill = await PaymentEntry.create({
+            ref_no: this.generateRefNo(),
+            admission_no,
+            class_code: sourceBill.class_code,
+            academic_year: sourceBill.academic_year,
+            term: sourceBill.term,
+            cr: sourceBill.cr,
+            dr: sourceBill.dr,
+            description: sourceBill.description,
+            quantity: sourceBill.quantity,
+            item_category: sourceBill.item_category,
+            payment_mode: sourceBill.payment_mode,
+            payment_status: 'Pending',
+            school_id: req.user.school_id,
+            branch_id: req.user.branch_id,
+            created_by
+          }, { transaction });
+
+          copiedBills.push(newBill);
+        }
+      }
+
+      await transaction.commit();
+
+      res.json({
+        success: true,
+        message: 'Bills copied successfully',
+        data: {
+          source_class_code,
+          target_students_count: target_students.length,
+          source_bills_count: sourceBills.length,
+          copied_bills_count: copiedBills.length,
+          replace_existing
+        }
+      });
+
+    } catch (error) {
+      await transaction.rollback();
+      console.error('Error copying bills:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to copy bills',
+        error: error.message
+      });
+    }
+  }
+
+  /**
+   * COMPREHENSIVE CONDITIONAL QUERY HANDLER
+   * Replaces: All conditional POST /payments queries with different query_types
+   * Handles all the conditional query scenarios that the legacy system supported
+   */
+  async handleConditionalQuery(req, res) {
+    try {
+      const {
+        query_type = 'select',
+        admission_no,
+        class_code,
+        class_name,
+        academic_year,
+        term,
+        payment_status,
+        ref_no,
+        start_date,
+        end_date,
+        limit = 100,
+        offset = 0
+      } = req.method === 'POST' ? req.body : req.query;
+
+      // Check authentication
+      if (!req.user || !req.user.school_id) {
+        return res.status(401).json({
+          success: false,
+          message: 'Authentication required. Please ensure you are logged in and have a valid JWT token.',
+          error: 'Missing or invalid user authentication',
+          system: 'ORM'
+        });
+      }
+
+      console.log('🔍 ORM: Handling conditional query:', {
+        query_type,
+        admission_no,
+        class_code: class_code || class_name,
+        academic_year,
+        term,
+        school_id: req.user.school_id
+      });
+
+      // Base where clause - ALWAYS exclude items with payment_status='Excluded'
+      const baseWhere = {
+        school_id: req.user.school_id,
+        payment_status: { [Op.ne]: 'Excluded' }
+      };
+
+      let result = [];
+      let message = '';
+      let responseQueryType = query_type;
+
+      switch (query_type) {
+        case 'select':
+        case 'select-entries':
+          const selectWhere = { ...baseWhere };
+          if (admission_no) selectWhere.admission_no = admission_no;
+          if (class_code || class_name) selectWhere.class_code = class_code || class_name;
+          if (academic_year) selectWhere.academic_year = academic_year;
+          if (term) selectWhere.term = term;
+          if (payment_status) selectWhere.payment_status = payment_status;
+          if (ref_no) selectWhere.ref_no = ref_no;
+          if (start_date && end_date) {
+            selectWhere.created_at = { [Op.between]: [start_date, end_date] };
+          }
+
+          const entries = await PaymentEntry.findAll({
+            where: selectWhere,
+            order: [['created_at', 'DESC']],
+            limit: parseInt(limit),
+            offset: parseInt(offset)
+          });
+
+          result = entries.map(entry => ({
+            id: entry.item_id,
+            item_id: entry.item_id,
+            ref_no: entry.ref_no,
+            admission_no: entry.admission_no,
+            class_code: entry.class_code,
+            academic_year: entry.academic_year,
+            term: entry.term,
+            cr: parseFloat(entry.cr || 0),
+            dr: parseFloat(entry.dr || 0),
+            balance: entry.getBalance(),
+            description: entry.description,
+            quantity: parseInt(entry.quantity || 1),
+            item_category: entry.item_category,
+            payment_status: entry.payment_status,
+            created_at: entry.created_at
+          }));
+          message = `Retrieved ${result.length} payment entries (excluding items with payment_status='Excluded')`;
+          break;
+
+        case 'select-student':
+        case 'select-revenues':
+          if (!admission_no) {
+            return res.status(400).json({
+              success: false,
+              message: 'admission_no is required for student queries'
+            });
+          }
+
+          const studentWhere = {
+            ...baseWhere,
+            admission_no
+          };
+          if (class_code || class_name) studentWhere.class_code = class_code || class_name;
+          if (academic_year) studentWhere.academic_year = academic_year;
+          if (term) studentWhere.term = term;
+
+          const studentPayments = await PaymentEntry.findAll({
+            where: studentWhere,
+            order: [['created_at', 'DESC']],
+            limit: parseInt(limit),
+            offset: parseInt(offset)
+          });
+
+          result = studentPayments.map(payment => ({
+            id: payment.item_id,
+            item_id: payment.item_id,
+            ref_no: payment.ref_no,
+            admission_no: payment.admission_no,
+            class_code: payment.class_code,
+            academic_year: payment.academic_year,
+            term: payment.term,
+            cr: parseFloat(payment.cr || 0),
+            dr: parseFloat(payment.dr || 0),
+            amount: parseFloat(payment.cr || 0),
+            description: payment.description,
+            quantity: parseInt(payment.quantity || 1),
+            item_category: payment.item_category,
+            payment_status: payment.payment_status,
+            is_optional: payment.payment_status === 'Pending' ? 'Yes' : 'No',
+            student_type: 'Regular',
+            status: payment.payment_status,
+            code: payment.item_id,
+            created_at: payment.created_at
+          }));
+          message = `Retrieved ${result.length} payment items for student ${admission_no} (excluding items with payment_status='Excluded')`;
+          break;
+
+        case 'select-bills':
+        case 'class-payments':
+          if (!class_code && !class_name) {
+            return res.status(400).json({
+              success: false,
+              message: 'class_code or class_name is required for class queries'
+            });
+          }
+
+          const classWhere = {
+            ...baseWhere,
+            class_code: class_code || class_name
+          };
+          if (academic_year) classWhere.academic_year = academic_year;
+          if (term) classWhere.term = term;
+
+          const classBills = await PaymentEntry.findAll({
+            where: classWhere,
+            order: [['admission_no', 'ASC'], ['created_at', 'DESC']],
+            limit: parseInt(limit),
+            offset: parseInt(offset)
+          });
+
+          result = classBills.map(bill => ({
+            id: bill.item_id,
+            item_id: bill.item_id,
+            ref_no: bill.ref_no,
+            admission_no: bill.admission_no,
+            class_code: bill.class_code,
+            academic_year: bill.academic_year,
+            term: bill.term,
+            cr: parseFloat(bill.cr || 0),
+            dr: parseFloat(bill.dr || 0),
+            balance: bill.getBalance(),
+            description: bill.description,
+            quantity: parseInt(bill.quantity || 1),
+            item_category: bill.item_category,
+            payment_status: bill.payment_status,
+            created_at: bill.created_at
+          }));
+          message = `Retrieved ${result.length} bills for class ${class_code || class_name} (excluding items with payment_status='Excluded')`;
+          break;
+
+        case 'balance':
+          if (!admission_no) {
+            return res.status(400).json({
+              success: false,
+              message: 'admission_no is required for balance queries'
+            });
+          }
+
+          const balanceWhere = {
+            ...baseWhere,
+            admission_no
+          };
+          if (academic_year) balanceWhere.academic_year = academic_year;
+          if (term) balanceWhere.term = term;
+
+          const balanceData = await PaymentEntry.findAll({
+            where: balanceWhere,
+            attributes: [
+              [db.sequelize.fn('SUM', db.sequelize.col('cr')), 'total_charges'],
+              [db.sequelize.fn('SUM', db.sequelize.col('dr')), 'total_payments'],
+              [db.sequelize.fn('COUNT', db.sequelize.col('item_id')), 'total_entries']
+            ],
+            raw: true
+          });
+
+          const totalCharges = parseFloat(balanceData[0]?.total_charges || 0);
+          const totalPayments = parseFloat(balanceData[0]?.total_payments || 0);
+          const balance = totalCharges - totalPayments;
+
+          result = [{
+            admission_no,
+            academic_year,
+            term,
+            total_charges: totalCharges,
+            total_payments: totalPayments,
+            outstanding_balance: balance,
+            total_entries: parseInt(balanceData[0]?.total_entries || 0)
+          }];
+          message = `Retrieved balance information for student ${admission_no}`;
+          break;
+
+        case 'summary':
+          const summaryWhere = { ...baseWhere };
+          if (start_date && end_date) {
+            summaryWhere.created_at = { [Op.between]: [start_date, end_date] };
+          }
+          if (academic_year) summaryWhere.academic_year = academic_year;
+          if (term) summaryWhere.term = term;
+
+          const summaryData = await PaymentEntry.findAll({
+            where: summaryWhere,
+            attributes: [
+              [db.sequelize.fn('COUNT', db.sequelize.fn('DISTINCT', db.sequelize.col('admission_no'))), 'total_students'],
+              [db.sequelize.fn('COUNT', db.sequelize.fn('DISTINCT', db.sequelize.col('ref_no'))), 'total_transactions'],
+              [db.sequelize.fn('COUNT', db.sequelize.col('item_id')), 'total_entries'],
+              [db.sequelize.fn('SUM', db.sequelize.col('cr')), 'total_charges'],
+              [db.sequelize.fn('SUM', db.sequelize.col('dr')), 'total_payments'],
+              [db.sequelize.fn('SUM', db.sequelize.literal('CASE WHEN payment_status = "Paid" THEN cr ELSE 0 END')), 'confirmed_payments'],
+              [db.sequelize.fn('SUM', db.sequelize.literal('CASE WHEN payment_status = "Pending" THEN cr ELSE 0 END')), 'pending_payments']
+            ],
+            raw: true
+          });
+
+          const summary = summaryData[0];
+          result = [{
+            total_students: parseInt(summary.total_students || 0),
+            total_transactions: parseInt(summary.total_transactions || 0),
+            total_entries: parseInt(summary.total_entries || 0),
+            total_charges: parseFloat(summary.total_charges || 0),
+            total_payments: parseFloat(summary.total_payments || 0),
+            outstanding_balance: parseFloat(summary.total_charges || 0) - parseFloat(summary.total_payments || 0),
+            confirmed_payments: parseFloat(summary.confirmed_payments || 0),
+            pending_payments: parseFloat(summary.pending_payments || 0)
+          }];
+          message = 'Payment summary generated successfully (excluding items with payment_status="Excluded")';
+          break;
+
+        case 'delete-student-bills':
+          if (!admission_no) {
+            return res.status(400).json({
+              success: false,
+              message: 'admission_no is required for delete-student-bills operation'
+            });
+          }
+
+          console.log('🗑️ ORM: Deleting student bills:', {
+            admission_no,
+            academic_year,
+            term,
+            school_id: req.user.school_id
+          });
+
+          const deleteWhere = {
+            admission_no,
+            school_id: req.user.school_id,
+            payment_status: 'Pending' // Only delete pending bills
+          };
+          if (academic_year) deleteWhere.academic_year = academic_year;
+          if (term) deleteWhere.term = term;
+
+          // Soft delete by updating payment_status to 'Excluded'
+          const deleteResult = await PaymentEntry.update(
+            { payment_status: 'Excluded' },
+            {
+              where: deleteWhere
+            }
+          );
+
+          console.log(`✅ ORM: Successfully excluded ${deleteResult[0] || 0} pending bills for student ${admission_no}`);
+
+          result = [{
+            admission_no,
+            academic_year,
+            term,
+            deleted_bills_count: deleteResult[0] || 0,
+            operation: 'soft_delete',
+            new_status: 'Excluded'
+          }];
+          message = `Successfully excluded ${deleteResult[0] || 0} pending bills for student ${admission_no}`;
+          break;        default:
+          return res.status(400).json({
+            success: false,
+            message: `Unsupported query_type: ${query_type}. Supported types: select, select-student, select-revenues, select-bills, class-payments, balance, summary, delete-student-bills`,
+            system: 'ORM'
+          });
+      }
+
+      res.json({
+        success: true,
+        message,
+        data: result,
+        query_type: responseQueryType,
+        system: 'ORM',
+        debug: {
+          original_query_type: query_type,
+          filters_applied: {
+            admission_no,
+            class_code: class_code || class_name,
+            academic_year,
+            term,
+            payment_status,
+            excluded_items_filtered: true
+          },
+          result_count: result.length
+        }
+      });
+
+    } catch (error) {
+      console.error('❌ ORM Error in conditional query handler:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to process conditional query',
+        error: error.message,
+        system: 'ORM'
+      });
+    }
+  }
+
+  /**
+   * GET PAYMENT REPORTS
+   * Replaces complex procedure-based reporting
+   */
+  async getPaymentReports(req, res) {
+    try {
+      const {
+        report_type = 'summary',
+        start_date,
+        end_date,
+        class_code,
+        academic_year,
+        term
+      } = req.query;
+
+      const where = {
+        school_id: req.user.school_id,
+        // ✅ FIXED: Exclude items with payment_status='Excluded' from reports
+        payment_status: { [Op.ne]: 'Excluded' }
+      };
+
+      if (start_date && end_date) {
+        where.created_at = {
+          [Op.between]: [start_date, end_date]
+        };
+      }
+
+      if (class_code) where.class_code = class_code;
+      if (academic_year) where.academic_year = academic_year;
+      if (term) where.term = term;
+
+      let reportData = {};
+
+      switch (report_type) {
+        case 'summary':
+          reportData = await PaymentEntry.findAll({
+            where,
+            attributes: [
+              'academic_year',
+              'term',
+              [db.sequelize.fn('SUM', db.sequelize.col('cr')), 'total_charges'],
+              [db.sequelize.fn('SUM', db.sequelize.col('dr')), 'total_payments'],
+              [db.sequelize.fn('COUNT', db.sequelize.col('item_id')), 'total_entries']
+            ],
+            group: ['academic_year', 'term'],
+            order: [['academic_year', 'DESC'], ['term', 'ASC']],
+            raw: true
+          });
+          break;
+
+        case 'by_class':
+          reportData = await PaymentEntry.findAll({
+            where,
+            attributes: [
+              'class_code',
+              'academic_year',
+              'term',
+              [db.sequelize.fn('SUM', db.sequelize.col('cr')), 'total_charges'],
+              [db.sequelize.fn('SUM', db.sequelize.col('dr')), 'total_payments'],
+              [db.sequelize.fn('COUNT', db.sequelize.col('item_id')), 'total_entries']
+            ],
+            group: ['class_code', 'academic_year', 'term'],
+            order: [['class_code', 'ASC'], ['academic_year', 'DESC']],
+            raw: true
+          });
+          break;
+
+        case 'by_category':
+          reportData = await PaymentEntry.findAll({
+            where,
+            attributes: [
+              'item_category',
+              [db.sequelize.fn('SUM', db.sequelize.col('cr')), 'total_charges'],
+              [db.sequelize.fn('SUM', db.sequelize.col('dr')), 'total_payments'],
+              [db.sequelize.fn('COUNT', db.sequelize.col('item_id')), 'total_entries']
+            ],
+            group: ['item_category'],
+            order: [['item_category', 'ASC']],
+            raw: true
+          });
+          break;
+
+        default:
+          return res.status(400).json({
+            success: false,
+            message: 'Invalid report_type. Use: summary, by_class, by_category'
+          });
+      }
+
+      res.json({
+        success: true,
+        message: 'Payment report generated successfully',
+        data: {
+          report_type,
+          filters: { start_date, end_date, class_code, academic_year, term },
+          results: reportData
+        }
+      });
+
+    } catch (error) {
+      console.error('Error generating payment report:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to generate payment report',
+        error: error.message
+      });
+    }
+  }
+}
+
+module.exports = new ORMPaymentsController();

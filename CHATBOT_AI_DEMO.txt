@@ -1,0 +1,199 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                  AI CHATBOT ACTIONS - LIVE DEMO EXAMPLES                     ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ DEMO 1: ATTENDANCE SUMMARY                                                   │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+👤 User: "summarize attendance"
+
+🤖 Bot:
+┌────────────────────────────────────────────────────────────────────────────┐
+│ 📊 Attendance Summary - Feb 10, 2026                                       │
+│                                                                            │
+│ 👨‍🎓 Students:                                                              │
+│ • Present: 450/500 (90%)                                                   │
+│ • Absent: 50                                                               │
+│ • Late: 15                                                                 │
+│                                                                            │
+│ 👨‍🏫 Staff:                                                                 │
+│ • Present: 45/50 (90%)                                                     │
+│ • Absent: 5                                                                │
+│                                                                            │
+│ ✅ Excellent attendance!                                                   │
+│                                                                            │
+│  ┌──────────────────┐  ┌──────────────────┐                              │
+│  │ 📥 Download      │  │ 📊 View Details  │                              │
+│  └──────────────────┘  └──────────────────┘                              │
+└────────────────────────────────────────────────────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════════════════════
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ DEMO 2: FINANCIAL SUMMARY                                                    │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+👤 User: "financial summary this week"
+
+🤖 Bot:
+┌────────────────────────────────────────────────────────────────────────────┐
+│ 💰 Financial Summary - This Week                                          │
+│                                                                            │
+│ Revenue: ₦450,000                                                          │
+│ • Payments received: 125                                                   │
+│                                                                            │
+│ Expenditure: ₦120,000                                                      │
+│                                                                            │
+│ Net: ₦330,000 📈                                                           │
+│                                                                            │
+│ ✅ Positive cash flow                                                      │
+│                                                                            │
+│  ┌──────────────────┐  ┌──────────────────┐                              │
+│  │ 📥 Download      │  │ 📊 View Breakdown│                              │
+│  └──────────────────┘  └──────────────────┘                              │
+└────────────────────────────────────────────────────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════════════════════
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ DEMO 3: STUDENT PERFORMANCE                                                  │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+👤 User: "class performance"
+
+🤖 Bot:
+┌────────────────────────────────────────────────────────────────────────────┐
+│ 🎓 Performance Summary - Term 1                                            │
+│                                                                            │
+│ Class Average: 72%                                                         │
+│                                                                            │
+│ Grade Distribution:                                                        │
+│ • Excellent (80-100): 120 students                                         │
+│ • Good (70-79): 180 students                                               │
+│ • Fair (60-69): 150 students                                               │
+│ • Poor (<60): 50 students                                                  │
+│                                                                            │
+│ Top 3 Students:                                                            │
+│ 1. John Doe - 95% (JSS1A)                                                  │
+│ 2. Jane Smith - 93% (JSS2B)                                                │
+│ 3. Bob Wilson - 91% (SS1A)                                                 │
+│                                                                            │
+│ ✅ Excellent overall performance!                                          │
+│                                                                            │
+│  ┌──────────────────┐  ┌──────────────────┐                              │
+│  │ 📥 Full Report   │  │ 📊 Class Breakdown│                             │
+│  └──────────────────┘  └──────────────────┘                              │
+└────────────────────────────────────────────────────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════════════════════
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ DEMO 4: NAVIGATION + ACTION COMBO                                            │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+👤 User: "show attendance"
+
+🤖 Bot:
+┌────────────────────────────────────────────────────────────────────────────┐
+│ To access Class Attendance, navigate:                                      │
+│                                                                            │
+│ 📍 Class Management → Daily Routine → Class Attendance                    │
+│                                                                            │
+│ Other related pages:                                                       │
+│ 2. Scanner (Personal Data Mngr)                                      │
+│ 3. Reports 📊 (Personal Data Mngr)                                         │
+│                                                                            │
+│  ┌──────────────────┐                                                     │
+│  │ 🔗 Go to Page    │                                                     │
+│  └──────────────────┘                                                     │
+└────────────────────────────────────────────────────────────────────────────┘
+
+👤 User: "summarize attendance"
+
+🤖 Bot:
+┌────────────────────────────────────────────────────────────────────────────┐
+│ 📊 Attendance Summary - Feb 10, 2026                                       │
+│ [Full summary as shown in Demo 1]                                          │
+└────────────────────────────────────────────────────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════════════════════
+
+SUPPORTED COMMANDS:
+
+📊 SUMMARIES:
+  • "summarize attendance"
+  • "attendance summary"
+  • "show attendance today"
+  • "financial summary"
+  • "revenue report today"
+  • "payments this week"
+  • "payments this month"
+  • "class performance"
+  • "student performance"
+  • "top students"
+
+🧭 NAVIGATION:
+  • "where is student list"
+  • "show me attendance"
+  • "find payment records"
+  • "go to reports"
+
+🎫 SUPPORT:
+  • "talk to human"
+  • "create ticket"
+  • "contact support"
+
+═══════════════════════════════════════════════════════════════════════════════
+
+FEATURES:
+
+✅ Natural Language Processing
+✅ Real-time Data Queries
+✅ Rich Formatted Responses
+✅ Action Buttons (Download, View Details)
+✅ Navigation Integration
+✅ Multi-tenant Support
+✅ Permission-based Access
+✅ Mobile Responsive
+
+═══════════════════════════════════════════════════════════════════════════════
+
+TIME SAVINGS:
+
+Manual Process:
+  1. Navigate to reports page (30 sec)
+  2. Select report type (15 sec)
+  3. Choose date range (20 sec)
+  4. Wait for generation (2 min)
+  5. Download/view (10 sec)
+  Total: ~3 minutes
+
+AI Chatbot:
+  1. Type "summarize attendance" (3 sec)
+  2. Get instant summary (2 sec)
+  Total: ~5 seconds
+
+⚡ 97% FASTER!
+
+═══════════════════════════════════════════════════════════════════════════════
+
+COMING SOON:
+
+Phase 2 (Week 3-4):
+  • Generate invoice for [student]
+  • Create receipt for [payment]
+  • Make ID card for [student]
+
+Phase 3 (Week 5-6):
+  • Generate report card for [student]
+  • Create all reports for [class]
+  • Bulk report generation
+
+Phase 4 (Week 7-8):
+  • "Which students haven't paid fees?"
+  • "Show me at-risk students"
+  • "Predict attendance trends"
+  • "Financial forecast next month"
+
+═══════════════════════════════════════════════════════════════════════════════

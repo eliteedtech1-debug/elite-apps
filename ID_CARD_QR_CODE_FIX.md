@@ -199,8 +199,8 @@ All changes maintain **backward compatibility**:
    - Verify QR code contains `staff_id`/`teacher_id` fields
 
 3. **Test Attendance Scanning:**
-   - Use Student Quick Scanner: `/attendance/quick-scanner`
-   - Use Staff Quick Scanner: `/hrm/staff-attendance-scanner`
+   - Use Student Scanner: `/attendance/quick-scanner`
+   - Use Staff Scanner: `/hrm/staff-attendance-scanner`
    - Scan generated ID cards
    - Verify attendance is marked successfully
 

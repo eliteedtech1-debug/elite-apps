@@ -1,228 +1,148 @@
-# Production Deployment Guide
+# PRODUCTION DEPLOYMENT: Teacher Menu Restrictions
 
-## File: PRODUCTION_MIGRATION_COMPLETE_2025_12_08.sql
+## ✅ READY FOR PRODUCTION
 
-This is your **COMPLETE** production-ready migration file.
+### Items Removed from Default Teacher Menu (7 total)
 
----
+#### Reports & Configuration (4 items)
+1. **Reports Generator** - `/academic/reports/Exam`
+2. **Broad Sheet** - `/academic/broad-sheet`
+3. **Report Template** - `/academic/report-configuration`
+4. **Print Answer Sheets** - `/academic/print-answer-sheets`
 
-## What's Included
-
-### ✅ RBAC System (3 tables)
-- `rbac_school_packages`
-- `subscription_packages` (3 packages: Elite, Premium, Standard)
-- `features` (13 features)
-
-### ✅ Recitations Module (3 tables)
-- `recitations`
-- `recitation_replies`
-- `recitation_feedbacks`
-
-### ✅ Asset Management (3 tables)
-- `assets`
-- `asset_categories`
-- `facility_rooms`
-
-### ✅ Teacher Management (2 tables)
-- `teachers`
-- `teacher_classes`
-
-### ✅ Supporting Tables (1 table)
-- `school_setup`
-
-### ✅ Collation Fix
-- Sets database default to `utf8mb4_unicode_ci`
-- All new tables use consistent collation
-- **Safe:** Doesn't change existing tables
+#### Curriculum Management (3 items)
+5. **Subject Mapping** - `/academic/subject-mapping`
+6. **Syllabus Dashboard** - `/developer/syllabus-dashboard`
+7. **Syllabus & Curriculum** - `/academic/syllabus`
 
 ---
 
-## Pre-Deployment Checklist
+## 📋 Production Deployment Steps
 
-- [ ] **Backup production database**
-  ```bash
-  mysqldump -u root -p production_db > backup_$(date +%Y%m%d_%H%M%S).sql
-  ```
-
-- [ ] **Test on staging first**
-  ```bash
-  mysql -u root -p staging_db < PRODUCTION_MIGRATION_COMPLETE_2025_12_08.sql
-  ```
-
-- [ ] **Verify staging works**
-  - Test RBAC endpoints
-  - Test recitations
-  - Test assets
-  - Test teachers
-
-- [ ] **Schedule maintenance window**
-  - Low traffic period
-  - 15-30 minutes downtime
-
----
-
-## Deployment Steps
-
-### 1. Backup Production
+### 1. Backup Database (CRITICAL)
 ```bash
-mysqldump -u root -p production_db > backup_before_migration.sql
+mysqldump -u root -p elite_prod_db rbac_menu_access > backup_rbac_menu_access_$(date +%Y%m%d_%H%M%S).sql
 ```
 
-### 2. Run Migration
+### 2. Execute SQL Script
 ```bash
-mysql -u root -p production_db < PRODUCTION_MIGRATION_COMPLETE_2025_12_08.sql
+mysql -u root -p elite_prod_db < production_teacher_menu_restriction.sql
 ```
 
-**Expected time:** 10-30 seconds
-
-### 3. Verify Migration
+### 3. Clear Redis Cache
 ```bash
-mysql -u root -p production_db -e "
-SELECT COUNT(*) FROM subscription_packages;
-SELECT COUNT(*) FROM features;
-SELECT COUNT(*) FROM recitations;
-SELECT COUNT(*) FROM assets;
-SELECT COUNT(*) FROM teachers;
-"
+redis-cli FLUSHALL
+# OR specific keys only:
+redis-cli KEYS "menu:*" | xargs redis-cli DEL
 ```
 
-Should show:
-- 3 packages
-- 13 features
-- 0 recitations (empty, ready for use)
-- 0 assets (empty, ready for use)
-- 0 teachers (empty, ready for use)
-
-### 4. Update Backend .env
+### 4. Verify Changes
 ```bash
-# No changes needed if DB_NAME is already correct
-# Just restart
-cd elscholar-api
-npm restart
-```
+# Check database
+mysql -u root -p elite_prod_db -e "
+SELECT m.id, m.label, GROUP_CONCAT(DISTINCT ma.user_type) as users
+FROM rbac_menu_items m
+LEFT JOIN rbac_menu_access ma ON m.id = ma.menu_item_id
+WHERE m.id IN (54, 55, 57, 1086, 21, 121, 1068)
+GROUP BY m.id, m.label;"
 
-### 5. Test Endpoints
-```bash
-# RBAC
-curl http://your-domain/api/packages/list
-
-# Recitations
-curl http://your-domain/api/recitations/list
-
-# Assets
-curl http://your-domain/api/assets/list
-
-# Teachers
-curl http://your-domain/api/teachers/list
+# Test teacher menu endpoint
+curl -s 'https://your-domain.com/api/rbac/menu' \
+  -H "Authorization: Bearer <TEACHER_TOKEN>" \
+  -H "X-School-Id: SCH/XX" \
+  -H "X-User-Type: Teacher" | jq '.data'
 ```
 
 ---
 
-## Rollback Plan
+## 🔍 Technical Details
 
-If anything goes wrong:
+### Database Changes
+- **Table**: `rbac_menu_access`
+- **Records Deleted**: 7 access records
+- **Affected Menu Items**: IDs 21, 54, 55, 57, 121, 1068, 1086
 
-### Option 1: Restore from Backup
-```bash
-mysql -u root -p production_db < backup_before_migration.sql
+### Access Removed
+- Direct `teacher` access: 5 records
+- `form_master` access (inherited by teacher): 2 records
+
+### Final Access Control
+All 7 items now restricted to administrative roles only:
+- admin, branchadmin, principal, director
+- exam_officer, vp_academic, vice_principal
+- head_of_dept, accountant (where applicable)
+
+---
+
+## 🔄 Rollback Plan (If Needed)
+
+```sql
+-- Restore teacher access to Broad Sheet
+INSERT INTO rbac_menu_access (menu_item_id, user_type, access_type) 
+VALUES (55, 'teacher', 'additional');
+
+-- Restore teacher access to Print Answer Sheets
+INSERT INTO rbac_menu_access (menu_item_id, user_type, access_type) 
+VALUES (1086, 'teacher', 'additional');
+
+-- Restore teacher access to Syllabus & Curriculum
+INSERT INTO rbac_menu_access (menu_item_id, user_type, access_type) 
+VALUES (21, 'teacher', 'additional');
+
+-- Restore teacher access to Subject Mapping
+INSERT INTO rbac_menu_access (menu_item_id, user_type, access_type) 
+VALUES (121, 'TEACHER', 'additional');
+
+-- Restore teacher and form_master access to Syllabus Dashboard
+INSERT INTO rbac_menu_access (menu_item_id, user_type, access_type) 
+VALUES (1068, 'TEACHER', 'additional'), (1068, 'form_master', 'additional');
+
+-- Restore form_master access to Reports Generator
+INSERT INTO rbac_menu_access (menu_item_id, user_type, access_type) 
+VALUES (54, 'form_master', 'additional');
+
+-- Restore form_master access to Report Template
+INSERT INTO rbac_menu_access (menu_item_id, user_type, access_type) 
+VALUES (57, 'form_master', 'additional');
+
+-- Clear cache
+-- redis-cli FLUSHALL
 ```
 
-### Option 2: Drop New Tables Only
-```bash
-mysql -u root -p production_db -e "
-DROP TABLE IF EXISTS recitation_feedbacks;
-DROP TABLE IF EXISTS recitation_replies;
-DROP TABLE IF EXISTS recitations;
-DROP TABLE IF EXISTS teacher_classes;
-DROP TABLE IF EXISTS teachers;
-DROP TABLE IF EXISTS assets;
-DROP TABLE IF EXISTS facility_rooms;
-DROP TABLE IF EXISTS asset_categories;
-DROP TABLE IF EXISTS rbac_school_packages;
-DROP TABLE IF EXISTS subscription_packages;
-DROP TABLE IF EXISTS features;
-DROP TABLE IF EXISTS school_setup;
-"
-```
+---
+
+## ✅ Testing Results
+
+**Environment**: Local Development (elite_prod_db)
+**Test User**: Teacher ID 1423, SCH/23, BRCH/29
+**Result**: ✅ All 7 items successfully removed
+**Cache**: ✅ Cleared and verified
 
 ---
 
-## Safety Features
+## 📝 Notes
 
-✅ **Idempotent:** Can run multiple times safely  
-✅ **Non-destructive:** Only creates new tables  
-✅ **Foreign key safe:** Disables checks during migration  
-✅ **Collation safe:** Only affects new tables  
-✅ **Data safe:** No DROP or DELETE statements  
-
----
-
-## Post-Deployment Monitoring
-
-### Check Logs
-```bash
-tail -f elscholar-api/logs/server.log
-```
-
-### Monitor Errors
-```bash
-tail -f elscholar-api/logs/error.log
-```
-
-### Check Database
-```bash
-mysql -u root -p production_db -e "SHOW TABLES;"
-```
+- Teachers retain access to core teaching features (grade entry, CA assessment, attendance, etc.)
+- Form masters will need explicit permission grants if they require these administrative features
+- Role inheritance: `teacher` → `form_master` (form_master extends teacher)
+- Cache TTL: 5 minutes (auto-refresh after changes)
 
 ---
 
-## Expected Results
+## 🚀 Production Checklist
 
-After successful deployment:
-
-- ✅ 13 new tables created
-- ✅ 3 packages available
-- ✅ 13 features configured
-- ✅ All foreign keys created
-- ✅ Consistent utf8mb4_unicode_ci collation
-- ✅ Backend starts without errors
-- ✅ All endpoints respond correctly
-
----
-
-## Support
-
-If issues occur:
-
-1. Check error logs
-2. Verify table creation
-3. Test individual endpoints
-4. Rollback if necessary
-5. Contact support with error details
+- [ ] Database backup completed
+- [ ] SQL script executed successfully
+- [ ] Redis cache cleared
+- [ ] Teacher menu verified (no restricted items visible)
+- [ ] Admin/Principal menu verified (items still accessible)
+- [ ] Form master role tested (if applicable)
+- [ ] Rollback script prepared and tested
+- [ ] Stakeholders notified of changes
 
 ---
 
-## Estimated Downtime
-
-- **Small DB (<1000 schools):** 10-15 seconds
-- **Medium DB (1000-10000 schools):** 15-30 seconds
-- **Large DB (>10000 schools):** 30-60 seconds
-
----
-
-## Success Criteria
-
-✅ Migration completes without errors  
-✅ All 13 tables created  
-✅ Backend restarts successfully  
-✅ All endpoints respond  
-✅ No data loss  
-✅ Existing features work normally  
-
----
-
-## File Location
-
-`/Users/apple/Downloads/apps/elite/PRODUCTION_MIGRATION_COMPLETE_2025_12_08.sql`
-
-**This is your single production migration file. Use this for deployment.**
+**Script Location**: `/tmp/production_teacher_menu_restriction.sql`
+**Date Prepared**: 2026-02-18
+**Tested**: ✅ Local environment
+**Status**: Ready for production deployment

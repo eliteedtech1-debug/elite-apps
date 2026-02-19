@@ -45,3 +45,11 @@ ON DUPLICATE KEY UPDATE
 -- - Header: Authorization: remitaConsumerKey={merchantId},remitaConsumerToken={apiToken}
 -- - Hash: SHA512(merchantId + serviceTypeId + orderId + totalAmount + apiKey)
 -- =====================================================
+
+ALTER TABLE payment_gateway_config 
+ADD COLUMN is_test_mode TINYINT(1) DEFAULT 1
+AFTER config_data
+,
+ADD COLUMN school_payment_integration ENUM('full', 'payroll_only') DEFAULT 'full' 
+AFTER is_test_mode
+;

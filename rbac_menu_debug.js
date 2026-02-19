@@ -20,7 +20,7 @@ const mockMenuItems = [
   { id: 11, parent_id: 1, label: 'Student Attendance', icon: 'ti ti-calendar-check', link: null, sort_order: 5, is_active: 1 },
   { id: 12, parent_id: 11, label: 'Reports 📊', icon: 'ti ti-chart-bar', link: '/attendance/dashboard', sort_order: 1, is_active: 1 },
   { id: 13, parent_id: 11, label: 'Mark Attendance', icon: 'ti ti-school', link: '/academic/attendance-register', sort_order: 2, is_active: 1 },
-  { id: 1090, parent_id: 11, label: 'Quick Scanner', icon: 'fas fa-qrcode', link: '/attendance/quick-scanner', sort_order: 0, is_active: 1 },
+  { id: 1090, parent_id: 11, label: 'Scanner', icon: 'fas fa-qrcode', link: '/attendance/quick-scanner', sort_order: 0, is_active: 1 },
   { id: 16, parent_id: null, label: 'Class Management', icon: '', link: '', sort_order: 2, is_active: 1 },
   { id: 17, parent_id: 16, label: 'Daily Routine', icon: 'fa fa-gears', link: null, sort_order: 1, is_active: 1 },
   { id: 18, parent_id: 17, label: 'Class Time Table', icon: 'ti ti-table', link: '/academic/class-time-table', sort_order: 1, is_active: 1 },

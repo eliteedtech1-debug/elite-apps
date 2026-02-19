@@ -1,134 +1,239 @@
-# 🚀 Quick Start - Unified ReportGenerator
+# 🚀 Quick Start Guide - Elite Scholar V2 API
 
-## ⚡ 3 Steps to Get Started
+## Step 1: Login First! 🔐
 
-### Step 1: Add the Route (2 minutes)
+**You MUST login before using any other endpoints.**
 
-Find your router file (usually `router/index.tsx` or `App.tsx`) and add:
+### Using Swagger UI (Easiest)
 
-```typescript
-import ReportGenerator from './feature-module/academic/examinations/exam-results/ReportGenerator';
+1. Open: http://localhost:34567/api-docs
 
-// Add this route
-<Route path="/reports/:assessmentType?" element={<ReportGenerator />} />
-```
+2. Find **"Authentication"** section (at the top)
 
-### Step 2: Update Your Menu (3 minutes)
+3. Click on **"POST /auth/login"**
 
-Replace your old report menu items with:
+4. Click **"Try it out"**
 
-```tsx
-<Menu.SubMenu title="Reports" icon={<FileTextOutlined />}>
-  <Menu.Item key="exam">
-    <Link to="/reports/Exam">📊 End of Term Report</Link>
-  </Menu.Item>
-  <Menu.Divider />
-  <Menu.ItemGroup title="Continuous Assessment">
-    <Menu.Item key="ca1">
-      <Link to="/reports/CA1">📝 CA1 Progress Report</Link>
-    </Menu.Item>
-    <Menu.Item key="ca2">
-      <Link to="/reports/CA2">📝 CA2 Progress Report</Link>
-    </Menu.Item>
-    <Menu.Item key="ca3">
-      <Link to="/reports/CA3">📝 CA3 Progress Report</Link>
-    </Menu.Item>
-  </Menu.ItemGroup>
-</Menu.SubMenu>
-```
+5. Enter your credentials:
+   ```json
+   {
+     "email": "your-email@school.com",
+     "password": "your-password"
+   }
+   ```
 
-### Step 3: Test (5 minutes)
+6. Click **"Execute"**
 
-1. Start your dev server
-2. Navigate to `/reports/Exam` → Should show End of Term Report
-3. Navigate to `/reports/CA1` → Should show CA1 Report with CA1 pre-selected
-4. Navigate to `/reports/CA2` → Should show CA2 Report with CA2 pre-selected
+7. Copy the **token** from the response
 
-**That's it! You're done!** ✅
+8. Click the **"Authorize"** button (top right, green lock icon)
 
-## 🎯 What You Get
+9. Paste token in format: `Bearer YOUR_TOKEN_HERE`
 
-- ✅ Single route for all reports: `/reports/:type`
-- ✅ Clean URLs: `/reports/CA1` instead of `/reports/ca-report?type=CA1`
-- ✅ Type validation: Invalid types redirect to Exam with error
-- ✅ Pre-selection: CA type is automatically selected when coming from menu
-- ✅ Backward compatible: Old components still work
-- ✅ Easy to extend: Add CA4, CA5, etc. by just adding config
+10. Click **"Authorize"**
 
-## 📊 URL Examples
-
-| URL | Result |
-|-----|--------|
-| `/reports` | End of Term Report (default) |
-| `/reports/Exam` | End of Term Report |
-| `/reports/CA1` | CA1 Report (CA1 pre-selected) |
-| `/reports/CA2` | CA2 Report (CA2 pre-selected) |
-| `/reports/CA3` | CA3 Report (CA3 pre-selected) |
-| `/reports/InvalidType` | Error → Redirect to Exam |
-
-## 🔧 Adding New Assessment Types
-
-Want to add CA4? Just edit `config/reportConfig.ts`:
-
-```typescript
-'CA4': {
-  type: 'CA4',
-  title: 'CA4 Progress Report',
-  apiEndpoint: 'reports/class-ca',
-  queryType: 'View Class CA Report',
-  columnType: 'weeks',
-  releaseText: 'Release CA4 Assessment',
-  releaseModalTitle: 'Release CA4 Assessment',
-  releaseModalMessage: 'Are you sure you want to release CA4 assessment results?',
-  icon: '📝',
-  isExam: false
-}
-```
-
-Then add to menu:
-
-```tsx
-<Menu.Item key="ca4">
-  <Link to="/reports/CA4">📝 CA4 Progress Report</Link>
-</Menu.Item>
-```
-
-**No code changes needed!** 🎉
-
-## 🐛 Troubleshooting
-
-### Issue: "Cannot find module './ReportGenerator'"
-
-**Solution**: Make sure the import path is correct:
-```typescript
-import ReportGenerator from './feature-module/academic/examinations/exam-results/ReportGenerator';
-```
-
-### Issue: CA type not pre-selected
-
-**Solution**: Check the URL - it should be `/reports/CA1` not `/reports/ca1` (case-sensitive)
-
-### Issue: Error "Invalid assessment type"
-
-**Solution**: Make sure the assessment type exists in `config/reportConfig.ts`
-
-## 📚 More Information
-
-- **Full Documentation**: See `REPORT_GENERATOR_COMPLETE.md`
-- **Routing Examples**: See `ROUTING_EXAMPLE.md`
-- **Implementation Guide**: See `IMPLEMENTATION_GUIDE.md`
-
-## ✅ Checklist
-
-- [ ] Added route to router
-- [ ] Updated menu items
-- [ ] Tested `/reports/Exam`
-- [ ] Tested `/reports/CA1`
-- [ ] Tested `/reports/CA2`
-- [ ] Verified WhatsApp sharing works
-- [ ] Verified PDF generation works
-- [ ] Deployed to production
+11. ✅ Now you can try all other endpoints!
 
 ---
 
-**Ready to go!** 🚀 The unified ReportGenerator is now active!
+## Step 2: Test V2 Endpoints
+
+### Using Swagger UI
+
+After authorization, try any endpoint:
+
+**Example: Get Lessons**
+1. Go to **"Lessons"** section
+2. Click **"GET /api/v2/lessons"**
+3. Click **"Try it out"**
+4. Fill in headers:
+   - X-School-Id: `SCH/20`
+   - X-Branch-Id: `BRCH00027`
+5. Click **"Execute"**
+6. See results!
+
+---
+
+## Step 3: Using cURL
+
+### 1. Login
+```bash
+curl -X POST http://localhost:34567/auth/login \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "email": "teacher@school.com",
+    "password": "password123"
+  }'
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user": {
+    "id": 1,
+    "email": "teacher@school.com",
+    "school_id": "SCH/20",
+    "branch_id": "BRCH00027"
+  }
+}
+```
+
+### 2. Copy the Token
+
+Copy the entire token value (starts with `eyJ...`)
+
+### 3. Use Token in Requests
+
+```bash
+# Get Lessons
+curl -X GET 'http://localhost:34567/api/v2/lessons' \
+  -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' \
+  -H 'X-School-Id: SCH/20' \
+  -H 'X-Branch-Id: BRCH00027'
+
+# Create Lesson
+curl -X POST 'http://localhost:34567/api/v2/lessons' \
+  -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' \
+  -H 'X-School-Id: SCH/20' \
+  -H 'X-Branch-Id: BRCH00027' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "title": "Introduction to Algebra",
+    "content": "Basic algebraic concepts",
+    "class_code": "JSS1A",
+    "subject_code": "MATH101",
+    "lesson_date": "2026-02-15"
+  }'
+
+# Mark Attendance
+curl -X POST 'http://localhost:34567/api/v2/attendance/mark' \
+  -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' \
+  -H 'X-School-Id: SCH/20' \
+  -H 'X-Branch-Id: BRCH00027' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "student_id": 101,
+    "class_code": "JSS1A",
+    "date": "2026-02-12",
+    "status": "Present"
+  }'
+```
+
+---
+
+## Common Issues
+
+### ❌ "Unauthorized"
+**Problem:** No token or invalid token
+
+**Solution:**
+1. Login first to get token
+2. Make sure token is in format: `Bearer YOUR_TOKEN`
+3. Check token hasn't expired
+
+### ❌ "X-School-Id header required"
+**Problem:** Missing multi-tenant headers
+
+**Solution:** Add these headers to ALL requests:
+```
+X-School-Id: SCH/20
+X-Branch-Id: BRCH00027
+```
+
+### ❌ "Validation error"
+**Problem:** Missing required fields or invalid data
+
+**Solution:** Check OpenAPI docs for required fields:
+- http://localhost:34567/api-docs
+- Look at the schema for each endpoint
+
+---
+
+## Testing Checklist
+
+### ✅ Authentication
+- [ ] Login successfully
+- [ ] Get valid JWT token
+- [ ] Token works in Swagger UI
+- [ ] Token works in cURL
+
+### ✅ Lessons
+- [ ] Get all lessons
+- [ ] Create new lesson
+- [ ] Get lesson by ID
+- [ ] Update lesson
+- [ ] Delete lesson
+- [ ] Add comment
+- [ ] Get comments
+
+### ✅ Assignments
+- [ ] Get all assignments
+- [ ] Create assignment
+- [ ] Submit assignment
+- [ ] Grade submission
+
+### ✅ Attendance
+- [ ] Mark single attendance
+- [ ] Bulk mark attendance
+- [ ] Get attendance stats
+- [ ] Get class attendance
+- [ ] Get student history
+
+### ✅ Syllabus
+- [ ] Get all syllabus
+- [ ] Create syllabus
+- [ ] Update syllabus
+
+---
+
+## Quick Reference
+
+### Base URLs
+- **API:** http://localhost:34567/api/v2
+- **Docs:** http://localhost:34567/api-docs
+- **Auth:** http://localhost:34567/auth/login
+
+### Required Headers
+```
+Authorization: Bearer YOUR_JWT_TOKEN
+X-School-Id: SCH/20
+X-Branch-Id: BRCH00027
+Content-Type: application/json
+```
+
+### Response Format
+```json
+{
+  "success": true,
+  "data": { ... }
+}
+```
+
+### Error Format
+```json
+{
+  "success": false,
+  "error": "Error message here"
+}
+```
+
+---
+
+## Next Steps
+
+1. ✅ Login and get token
+2. ✅ Test endpoints in Swagger UI
+3. ✅ Verify data in database
+4. ✅ Update frontend to use V2 API
+5. ✅ Monitor for issues
+
+---
+
+**Need Help?**
+- Check: http://localhost:34567/api-docs
+- Read: API_DOCUMENTATION.md
+- Review: ACTIONABLE_ROADMAP.md
+
+**Happy Testing! 🚀**

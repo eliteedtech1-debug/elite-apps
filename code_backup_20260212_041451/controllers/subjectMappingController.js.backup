@@ -1,0 +1,658 @@
+const db = require('../models');
+
+class SubjectMappingController {
+  // GET /api/v1/subject-mapping/school-subjects - Get school's subjects for mapping
+  async getSchoolSubjects(req, res) {
+    try {
+      const { school_id, branch_id } = req.user;
+      
+      // Get school's current subjects from subjects table
+      const schoolSubjects = await db.sequelize.query(`
+        SELECT DISTINCT 
+          s.subject as school_subject_name,
+          s.subject_code as school_subject_code,
+          s.class_code as school_class_code,
+          ssm.global_subject_code,
+          ssm.global_level_code,
+          ssm.mapping_status,
+          ssm.id as mapping_id
+        FROM subjects s
+        LEFT JOIN school_subject_mapping ssm ON (
+          s.subject = ssm.school_subject_name 
+          AND s.class_code = ssm.school_class_code
+          AND ssm.school_id = :school_id
+        )
+        WHERE s.school_id = :school_id
+        ORDER BY s.class_code, s.subject
+      `, {
+        replacements: { school_id },
+        type: db.Sequelize.QueryTypes.SELECT
+      });
+
+      res.json({
+        success: true,
+        data: schoolSubjects
+      });
+    } catch (error) {
+      console.error('Get school subjects error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to retrieve school subjects'
+      });
+    }
+  }
+
+  // GET /api/v1/subject-mapping/global-content - Get available global content
+  async getGlobalContent(req, res) {
+    try {
+      const globalContent = await db.sequelize.query(`
+        SELECT DISTINCT
+          global_subject_code,
+          global_level_code,
+          subject as global_subject_name,
+          class_code as global_class_name,
+          COUNT(*) as topic_count,
+          scraped_source
+        FROM syllabus 
+        WHERE is_global_content = TRUE
+        GROUP BY global_subject_code, global_level_code, subject, class_code, scraped_source
+        ORDER BY global_level_code, global_subject_code
+      `, {
+        type: db.Sequelize.QueryTypes.SELECT
+      });
+
+      res.json({
+        success: true,
+        data: globalContent
+      });
+    } catch (error) {
+      console.error('Get global content error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to retrieve global content'
+      });
+    }
+  }
+
+  // POST /api/v1/subject-mapping/create - Create subject mapping
+  async createMapping(req, res) {
+    try {
+      const { school_id, branch_id, id: mapped_by } = req.user;
+      const {
+        school_subject_name,
+        school_subject_code,
+        school_class_code,
+        global_subject_code,
+        global_level_code,
+        mapping_confidence = 1.00
+      } = req.body;
+
+      // Check if mapping already exists
+      const existingMapping = await db.sequelize.query(`
+        SELECT id FROM school_subject_mapping 
+        WHERE school_id = :school_id 
+        AND school_subject_name = :school_subject_name 
+        AND school_class_code = :school_class_code
+      `, {
+        replacements: { school_id, school_subject_name, school_class_code },
+        type: db.Sequelize.QueryTypes.SELECT
+      });
+
+      if (existingMapping.length > 0) {
+        return res.status(400).json({
+          success: false,
+          error: 'Mapping already exists for this subject and class'
+        });
+      }
+
+      // Create new mapping
+      const [insertResult] = await db.sequelize.query(`
+        INSERT INTO school_subject_mapping (
+          school_id, branch_id, school_subject_name, school_subject_code,
+          school_class_code, global_subject_code, global_level_code,
+          mapping_confidence, mapped_by, mapping_status
+        ) VALUES (
+          :school_id, :branch_id, :school_subject_name, :school_subject_code,
+          :school_class_code, :global_subject_code, :global_level_code,
+          :mapping_confidence, :mapped_by, 'pending'
+        )
+      `, {
+        replacements: {
+          school_id, branch_id, school_subject_name, school_subject_code,
+          school_class_code, global_subject_code, global_level_code,
+          mapping_confidence, mapped_by
+        },
+        type: db.Sequelize.QueryTypes.INSERT
+      });
+
+      res.status(201).json({
+        success: true,
+        data: { mapping_id: insertResult },
+        message: 'Subject mapping created successfully'
+      });
+    } catch (error) {
+      console.error('Create mapping error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to create subject mapping'
+      });
+    }
+  }
+
+  // PUT /api/v1/subject-mapping/:id/approve - Approve mapping (Senior Master)
+  async approveMapping(req, res) {
+    try {
+      const { id } = req.params;
+      const { id: approved_by } = req.user;
+      const { action } = req.body; // 'approve' or 'reject'
+
+      const status = action === 'approve' ? 'approved' : 'rejected';
+
+      const [affectedRows] = await db.sequelize.query(`
+        UPDATE school_subject_mapping 
+        SET mapping_status = :status, approved_by = :approved_by, updated_at = NOW()
+        WHERE id = :id
+      `, {
+        replacements: { id, status, approved_by },
+        type: db.Sequelize.QueryTypes.UPDATE
+      });
+
+      if (affectedRows === 0) {
+        return res.status(404).json({
+          success: false,
+          error: 'Mapping not found'
+        });
+      }
+
+      res.json({
+        success: true,
+        message: `Mapping ${action}d successfully`
+      });
+    } catch (error) {
+      console.error('Approve mapping error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to approve mapping'
+      });
+    }
+  }
+
+  // POST /api/v1/subject-mapping/auto-suggest - AI-powered mapping suggestions
+  async autoSuggestMappings(req, res) {
+    try {
+      const { school_id } = req.user;
+      
+      // Get unmapped school subjects
+      const unmappedSubjects = await db.sequelize.query(`
+        SELECT DISTINCT 
+          s.subject as school_subject_name,
+          s.class_code as school_class_code
+        FROM subjects s
+        LEFT JOIN school_subject_mapping ssm ON (
+          s.subject = ssm.school_subject_name 
+          AND s.class_code = ssm.school_class_code
+          AND ssm.school_id = :school_id
+        )
+        WHERE s.school_id = :school_id AND ssm.id IS NULL
+      `, {
+        replacements: { school_id },
+        type: db.Sequelize.QueryTypes.SELECT
+      });
+
+      // Get available global content
+      const globalContent = await db.sequelize.query(`
+        SELECT DISTINCT global_subject_code, global_level_code, subject, class_code
+        FROM syllabus WHERE is_global_content = TRUE
+      `, {
+        type: db.Sequelize.QueryTypes.SELECT
+      });
+
+      // AI-powered mapping suggestions
+      const suggestions = [];
+      
+      for (const schoolSubject of unmappedSubjects) {
+        const suggestion = this.generateMappingSuggestion(schoolSubject, globalContent);
+        if (suggestion) {
+          suggestions.push({
+            school_subject_name: schoolSubject.school_subject_name,
+            school_class_code: schoolSubject.school_class_code,
+            suggested_global_subject_code: suggestion.global_subject_code,
+            suggested_global_level_code: suggestion.global_level_code,
+            confidence_score: suggestion.confidence,
+            reasoning: suggestion.reasoning
+          });
+        }
+      }
+
+      res.json({
+        success: true,
+        data: suggestions,
+        message: `Generated ${suggestions.length} mapping suggestions`
+      });
+    } catch (error) {
+      console.error('Auto suggest mappings error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to generate mapping suggestions'
+      });
+    }
+  }
+
+  generateMappingSuggestion(schoolSubject, globalContent) {
+    const { school_subject_name, school_class_code } = schoolSubject;
+    
+    // Simple AI logic for mapping suggestions
+    const subjectName = school_subject_name.toLowerCase();
+    const className = school_class_code.toLowerCase();
+    
+    // Mathematics variations
+    if (subjectName.includes('math')) {
+      const levelMapping = this.mapClassToLevel(className);
+      if (levelMapping) {
+        return {
+          global_subject_code: 'MATH_PRIMARY',
+          global_level_code: levelMapping,
+          confidence: this.calculateConfidence(subjectName, 'mathematics'),
+          reasoning: `Detected mathematics subject variant: "${school_subject_name}"`
+        };
+      }
+    }
+    
+    // English variations
+    if (subjectName.includes('english') || subjectName.includes('language')) {
+      const levelMapping = this.mapClassToLevel(className);
+      if (levelMapping) {
+        return {
+          global_subject_code: 'ENG_PRIMARY',
+          global_level_code: levelMapping,
+          confidence: this.calculateConfidence(subjectName, 'english'),
+          reasoning: `Detected English/Language subject: "${school_subject_name}"`
+        };
+      }
+    }
+    
+    // Science variations
+    if (subjectName.includes('science') || subjectName.includes('basic science')) {
+      const levelMapping = this.mapClassToLevel(className);
+      if (levelMapping) {
+        return {
+          global_subject_code: 'SCI_PRIMARY',
+          global_level_code: levelMapping,
+          confidence: this.calculateConfidence(subjectName, 'science'),
+          reasoning: `Detected Science subject: "${school_subject_name}"`
+        };
+      }
+    }
+    
+    return null;
+  }
+
+  mapClassToLevel(className) {
+    const classMap = {
+      'primary 1': 'P1', 'p1': 'P1', 'class 1': 'P1',
+      'primary 2': 'P2', 'p2': 'P2', 'class 2': 'P2',
+      'primary 3': 'P3', 'p3': 'P3', 'class 3': 'P3',
+      'primary 4': 'P4', 'p4': 'P4', 'class 4': 'P4',
+      'primary 5': 'P5', 'p5': 'P5', 'class 5': 'P5',
+      'primary 6': 'P6', 'p6': 'P6', 'class 6': 'P6',
+      'jss 1': 'JSS1', 'jss1': 'JSS1', 'junior 1': 'JSS1',
+      'jss 2': 'JSS2', 'jss2': 'JSS2', 'junior 2': 'JSS2',
+      'jss 3': 'JSS3', 'jss3': 'JSS3', 'junior 3': 'JSS3'
+    };
+    
+    return classMap[className] || null;
+  }
+
+  calculateConfidence(schoolSubject, globalSubject) {
+    const subject = schoolSubject.toLowerCase();
+    
+    // Exact match
+    if (subject === globalSubject) return 0.95;
+    
+    // Contains keyword
+    if (subject.includes(globalSubject)) return 0.85;
+    
+    // Mathematics variations
+    if (globalSubject === 'mathematics') {
+      if (subject.includes('math') || subject.includes('arithmetic') || subject.includes('numeracy')) {
+        return 0.80;
+      }
+    }
+    
+    // English variations
+    if (globalSubject === 'english') {
+      if (subject.includes('language') || subject.includes('literacy') || subject.includes('communication')) {
+        return 0.75;
+      }
+    }
+    
+    return 0.60; // Default confidence for partial matches
+  }
+
+  // POST /api/v1/subject-mapping/bulk-create - Create multiple mappings with admin decisions
+  async bulkCreateMappings(req, res) {
+    try {
+      const { school_id, branch_id, id: mapped_by } = req.user;
+      const { mappings } = req.body; // Array of mapping decisions
+      
+      const results = [];
+      const errors = [];
+      
+      for (const mapping of mappings) {
+        try {
+          const {
+            school_subject_name,
+            school_class_code,
+            global_subject_code,
+            global_level_code,
+            admin_decision, // 'accept', 'modify', 'reject'
+            confidence_score
+          } = mapping;
+          
+          if (admin_decision === 'reject') {
+            results.push({
+              school_subject_name,
+              status: 'rejected',
+              message: 'Admin rejected auto-suggestion'
+            });
+            continue;
+          }
+          
+          // Create mapping (accept or modify)
+          const [insertResult] = await db.sequelize.query(`
+            INSERT INTO school_subject_mapping (
+              school_id, branch_id, school_subject_name, school_class_code,
+              global_subject_code, global_level_code, mapping_confidence,
+              mapped_by, mapping_status
+            ) VALUES (
+              :school_id, :branch_id, :school_subject_name, :school_class_code,
+              :global_subject_code, :global_level_code, :confidence_score,
+              :mapped_by, 'pending'
+            )
+          `, {
+            replacements: {
+              school_id, branch_id, school_subject_name, school_class_code,
+              global_subject_code, global_level_code, 
+              confidence_score: confidence_score || 0.80,
+              mapped_by
+            },
+            type: db.Sequelize.QueryTypes.INSERT
+          });
+          
+          results.push({
+            school_subject_name,
+            mapping_id: insertResult,
+            status: admin_decision,
+            message: `Mapping ${admin_decision}ed by admin`
+          });
+          
+        } catch (error) {
+          errors.push({
+            school_subject_name: mapping.school_subject_name,
+            error: error.message
+          });
+        }
+      }
+      
+      res.status(201).json({
+        success: true,
+        data: {
+          total_processed: mappings.length,
+          successful: results.length,
+          failed: errors.length,
+          results,
+          errors
+        },
+        message: `Processed ${mappings.length} mapping decisions`
+      });
+    } catch (error) {
+      console.error('Bulk create mappings error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to process bulk mapping decisions'
+      });
+    }
+  }
+  async getMappedContent(req, res) {
+    try {
+      const { school_id } = req.user;
+      const { subject_name, class_code } = req.query;
+
+      let whereClause = 'WHERE ssm.school_id = :school_id AND ssm.mapping_status = "approved"';
+      const replacements = { school_id };
+
+      if (subject_name) {
+        whereClause += ' AND ssm.school_subject_name = :subject_name';
+        replacements.subject_name = subject_name;
+      }
+      if (class_code) {
+        whereClause += ' AND ssm.school_class_code = :class_code';
+        replacements.class_code = class_code;
+      }
+
+      const mappedContent = await db.sequelize.query(`
+        SELECT 
+          s.id, s.title, s.content, s.term, s.week,
+          s.global_subject_code, s.global_level_code,
+          ssm.school_subject_name, ssm.school_class_code,
+          ssm.mapping_confidence, s.scraped_source
+        FROM school_mapped_syllabus ssm
+        INNER JOIN syllabus s ON (
+          s.global_subject_code = ssm.global_subject_code 
+          AND s.global_level_code = ssm.global_level_code
+        )
+        ${whereClause}
+        ORDER BY ssm.school_class_code, ssm.school_subject_name, s.term, s.week
+      `, {
+        replacements,
+        type: db.Sequelize.QueryTypes.SELECT
+      });
+
+      res.json({
+        success: true,
+        data: mappedContent,
+        count: mappedContent.length
+      });
+    } catch (error) {
+      console.error('Get mapped content error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to retrieve mapped content'
+      });
+    }
+  }
+
+  // POST /api/v1/subject-mapping/generate-lesson-plan - Generate lesson plan from mapped content
+  async generateLessonPlanFromMapping(req, res) {
+    try {
+      const { id: teacher_id, school_id, branch_id } = req.user;
+      const { 
+        school_subject_name, 
+        school_class_code, 
+        syllabus_ids = [],
+        lesson_date,
+        title 
+      } = req.body;
+
+      // Get mapped syllabus content
+      let mappedContent = [];
+      
+      if (syllabus_ids.length > 0) {
+        mappedContent = await db.sequelize.query(`
+          SELECT s.* FROM syllabus s
+          INNER JOIN school_subject_mapping ssm ON (
+            s.global_subject_code = ssm.global_subject_code 
+            AND s.global_level_code = ssm.global_level_code
+          )
+          WHERE ssm.school_id = :school_id 
+          AND ssm.school_subject_name = :school_subject_name
+          AND ssm.school_class_code = :school_class_code
+          AND ssm.mapping_status = 'approved'
+          AND s.id IN (:syllabus_ids)
+        `, {
+          replacements: { school_id, school_subject_name, school_class_code, syllabus_ids },
+          type: db.Sequelize.QueryTypes.SELECT
+        });
+      } else {
+        // If no specific syllabus IDs, get general mapped content for the subject/class
+        mappedContent = await db.sequelize.query(`
+          SELECT s.* FROM syllabus s
+          INNER JOIN school_subject_mapping ssm ON (
+            s.global_subject_code = ssm.global_subject_code 
+            AND s.global_level_code = ssm.global_level_code
+          )
+          WHERE ssm.school_id = :school_id 
+          AND ssm.school_subject_name = :school_subject_name
+          AND ssm.school_class_code = :school_class_code
+          AND ssm.mapping_status = 'approved'
+          LIMIT 5
+        `, {
+          replacements: { school_id, school_subject_name, school_class_code },
+          type: db.Sequelize.QueryTypes.SELECT
+        });
+      }
+
+      // Generate lesson plan using AI (even if no specific mapped content)
+      const lessonPlanContent = await this.generateAILessonPlan({
+        title,
+        subject: school_subject_name,
+        classCode: school_class_code,
+        mappedContent,
+        lessonDate: lesson_date
+      });
+
+      res.json({
+        success: true,
+        data: {
+          lesson_plan: lessonPlanContent,
+          mapped_content_used: mappedContent.length
+        }
+      });
+
+    } catch (error) {
+      console.error('Generate lesson plan error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to generate lesson plan from mapped content'
+      });
+    }
+  }
+
+  async generateAILessonPlan(params) {
+    const { title, subject, classCode, mappedContent, lessonDate } = params;
+    
+    // Simple lesson plan template - can be enhanced with actual AI integration
+    const objectives = `By the end of this lesson on ${title}, students will be able to:
+1. Understand the basic concepts of ${title}
+2. Identify key components and processes
+3. Apply knowledge to real-world examples`;
+
+    const activities = `1. Introduction and warm-up (5 minutes)
+2. Main lesson presentation (20 minutes)
+3. Interactive discussion and examples (10 minutes)
+4. Practice activities and exercises (15 minutes)
+5. Summary and conclusion (5 minutes)`;
+
+    const resources = `- Textbooks and reference materials
+- Visual aids and diagrams
+- Interactive whiteboard/projector
+- Worksheets and handouts
+- Real-world examples and case studies`;
+
+    return {
+      title,
+      subject,
+      classCode,
+      lessonDate,
+      objectives,
+      activities,
+      resources,
+      mappedContentCount: mappedContent.length
+    };
+        });
+      }
+
+      // Generate lesson plan using mapped content
+      const content = JSON.parse(mappedContent[0].content || '{}');
+      
+      const [insertResult] = await db.sequelize.query(`
+        INSERT INTO syllabus_tracker (
+          teacher_id, syllabus_id, title, objectives, lesson_content,
+          activities, subject, class_code, term, week,
+          ai_generated, school_id, branch_id, status, created_at
+        ) VALUES (
+          :teacher_id, :syllabus_id, :title, :objectives, :lesson_content,
+          :activities, :subject, :class_code, :term, :week,
+          true, :school_id, :branch_id, 'draft', NOW()
+        )
+      `, {
+        replacements: {
+          teacher_id,
+          syllabus_id: mappedContent[0].id,
+          title: title || `${school_subject_name}: ${mappedContent[0].title}`,
+          objectives: JSON.stringify(content.objectives || []),
+          lesson_content: `Mapped from global content: ${mappedContent[0].title}`,
+          activities: JSON.stringify(content.activities || []),
+          subject: school_subject_name, // Use school's subject name
+          class_code: school_class_code, // Use school's class code
+          term: mappedContent[0].term,
+          week: mappedContent[0].week,
+          school_id,
+          branch_id
+        },
+        type: db.Sequelize.QueryTypes.INSERT
+      });
+
+      res.status(201).json({
+        success: true,
+        data: {
+          lesson_plan_id: insertResult,
+          mapped_from: mappedContent[0].title,
+          school_subject: school_subject_name
+        },
+        message: 'Lesson plan generated from mapped content'
+      });
+    } catch (error) {
+      console.error('Generate lesson plan from mapping error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to generate lesson plan from mapped content'
+      });
+    }
+  }
+
+  async generateAILessonPlan(params) {
+    const { title, subject, classCode, mappedContent, lessonDate } = params;
+    
+    // Simple lesson plan template - can be enhanced with actual AI integration
+    const objectives = `By the end of this lesson on ${title}, students will be able to:
+1. Understand the basic concepts of ${title}
+2. Identify key components and processes
+3. Apply knowledge to real-world examples`;
+
+    const activities = `1. Introduction and warm-up (5 minutes)
+2. Main lesson presentation (20 minutes)
+3. Interactive discussion and examples (10 minutes)
+4. Practice activities and exercises (15 minutes)
+5. Summary and conclusion (5 minutes)`;
+
+    const resources = `- Textbooks and reference materials
+- Visual aids and diagrams
+- Interactive whiteboard/projector
+- Worksheets and handouts
+- Real-world examples and case studies`;
+
+    return {
+      title,
+      subject,
+      classCode,
+      lessonDate,
+      objectives,
+      activities,
+      resources,
+      mappedContentCount: mappedContent.length
+    };
+  }
+}
+
+module.exports = new SubjectMappingController();

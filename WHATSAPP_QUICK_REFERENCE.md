@@ -1,151 +1,112 @@
-# WhatsApp Global State - Quick Reference
+# WhatsApp Integration - Quick Reference
 
-## 🚀 Quick Start (30 seconds)
+## 🚀 Start Services
 
-### Use WhatsApp Status in Any Component:
+```bash
+# API Server
+cd elscholar-api && npm run dev
 
-```typescript
-import { useWhatsApp } from '../contexts/WhatsAppContext';
-
-const MyComponent = () => {
-  const { isConnected, phoneNumber } = useWhatsApp();
-
-  return (
-    <div>
-      {isConnected ? `Connected: ${phoneNumber}` : 'Not Connected'}
-    </div>
-  );
-};
+# Worker
+cd elscholar-api && node src/queues/whatsappWorker.js > logs/whatsapp-worker.log 2>&1 &
 ```
 
----
+## 📱 Connect WhatsApp
 
-## 📊 Common Use Cases
-
-### 1. Check Before Sending Message
-
-```typescript
-const { isConnected } = useWhatsApp();
-
-const handleSend = () => {
-  if (!isConnected) {
-    message.error("WhatsApp not connected");
-    return;
-  }
-  // Send message...
-};
+```bash
+curl -X POST http://localhost:34567/api/whatsapp/connect \
+  -H 'Content-Type: application/json' \
+  -d '{"school_id": "SCH/23", "short_name": "DKG"}'
 ```
 
-### 2. Show Status Indicator
+Scan QR code with WhatsApp mobile app.
 
-```typescript
-import WhatsAppStatusIndicator from '../components/WhatsAppStatusIndicator';
+## 📤 Send Message
 
-<WhatsAppStatusIndicator />
+```bash
+curl -X POST http://localhost:34567/api/whatsapp/send-with-pdf \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "school_id": "SCH/23",
+    "phone": "07035384184",
+    "message": "Your receipt",
+    "pdfBase64": "BASE64_STRING",
+    "filename": "receipt.pdf"
+  }'
 ```
 
-### 3. Manual Status Refresh
+## 🔍 Check Status
 
-```typescript
-const { checkStatus, isChecking } = useWhatsApp();
+```bash
+# Connection status
+curl http://localhost:34567/api/whatsapp/status?school_id=SCH/23
 
-<Button onClick={checkStatus} loading={isChecking}>
-  Refresh
-</Button>
+# Worker status
+ps aux | grep whatsappWorker
+
+# Queue status
+redis-cli LLEN bull:whatsapp:wait
+
+# Recent messages
+mysql -u root full_skcooly -e "SELECT * FROM whatsapp_messages ORDER BY id DESC LIMIT 5;"
 ```
 
-### 4. Update After Connect
+## 🔧 Troubleshooting
 
-```typescript
-const { checkStatus } = useWhatsApp();
+```bash
+# Restart worker
+pkill -f whatsappWorker
+node src/queues/whatsappWorker.js > logs/whatsapp-worker.log 2>&1 &
 
-<WhatsAppConnection
-  onConnected={() => checkStatus()}
-/>
+# Clear session
+rm -rf .baileys_auth/session-SCH_23_*
+
+# Check logs
+tail -f logs/whatsapp-worker.log
 ```
 
-### 5. Update After Disconnect
+## 📊 Monitoring
 
-```typescript
-const { setConnectionStatus } = useWhatsApp();
+```bash
+# Worker logs
+tail -f logs/whatsapp-worker.log
 
-const disconnect = () => {
-  _post('api/whatsapp/disconnect', {}, () => {
-    setConnectionStatus(false, null);
-  });
-};
+# Redis queue
+redis-cli
+> KEYS bull:whatsapp:*
+> LLEN bull:whatsapp:wait
+
+# Database stats
+mysql -u root full_skcooly -e "
+  SELECT COUNT(*) as total_sent 
+  FROM whatsapp_messages;
+"
 ```
 
----
+## 📞 Phone Format
 
-## 🎯 Hook API
+Nigerian numbers are auto-normalized:
+- `07035384184` → `2347035384184`
+- `08012345678` → `2348012345678`
+- `09087654321` → `2349087654321`
 
-```typescript
-const {
-  isConnected,      // boolean - Connection status
-  phoneNumber,      // string | null - Connected number
-  isChecking,       // boolean - Loading state
-  lastChecked,      // Date | null - Last check time
-  checkStatus,      // () => Promise<void> - Manual check
-  setConnectionStatus // (connected, phone?) => void - Update
-} = useWhatsApp();
-```
+## 🔐 Important Files
 
----
+- **Service**: `src/services/baileysWhatsappService.js`
+- **Routes**: `src/routes/whatsapp_service.js`
+- **Worker**: `src/queues/whatsappWorker.js`
+- **Sessions**: `.baileys_auth/`
+- **Logs**: `logs/whatsapp-worker.log`
 
-## 🔧 Component Props
-
-```typescript
-<WhatsAppStatusIndicator
-  showIcon={true}          // Show WhatsApp icon
-  showPhoneNumber={true}   // Show phone number
-  size="default"           // 'small' | 'default'
-  style={{}}               // Custom styles
-/>
-```
-
----
-
-## ✅ Do's and Don'ts
-
-### ✅ DO:
-- Use `useWhatsApp()` hook
-- Check `isConnected` before sending
-- Use `<WhatsAppStatusIndicator />` for status display
-- Call `checkStatus()` after connecting
-
-### ❌ DON'T:
-- Create local state for WhatsApp status
-- Make direct API calls to `/api/whatsapp/status`
-- Forget to check connection before sending
-
----
-
-## 📁 Files
-
-| File | Purpose |
-|------|---------|
-| `contexts/WhatsAppContext.tsx` | Global state manager |
-| `components/WhatsAppStatusIndicator.tsx` | Reusable status component |
-| `index.tsx` | App wrapped with provider |
-
----
-
-## 🐛 Common Issues
+## ⚠️ Common Issues
 
 | Issue | Solution |
 |-------|----------|
-| Hook error | Ensure app wrapped with `<WhatsAppProvider>` |
-| Status not updating | Call `checkStatus()` after connect/disconnect |
-| Different status on pages | All components must use `useWhatsApp()` |
-
----
+| Worker not processing | Restart worker |
+| Connection drops | Clear session and reconnect |
+| Messages not sending | Check subscription status |
+| Queue stuck | Check Redis connection |
 
 ## 📚 Full Documentation
 
-See `WHATSAPP_GLOBAL_STATE_DOCUMENTATION.md` for complete guide.
-
----
-
-**Status:** ✅ Production Ready
-**Last Updated:** 2025-01-08
+- **Deployment**: `WHATSAPP_DEPLOYMENT.md`
+- **Summary**: `WHATSAPP_IMPLEMENTATION_SUMMARY.md`

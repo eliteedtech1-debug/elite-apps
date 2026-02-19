@@ -1,0 +1,633 @@
+const db = require("../models");
+const moment = require("moment");
+const EnhancedTimeSlotService = require("../services/EnhancedTimeSlotService");
+const CulturalScheduleService = require("../services/CulturalScheduleService");
+const NigerianEducationOptimizer = require("../services/NigerianEducationOptimizer");
+
+const enhanced_time_slots = (req, res) => {
+  const {
+    query_type = "create",
+    slot_id = null,
+    school_id = null,
+    section = null,
+    slot_name = null,
+    start_time = null,
+    end_time = null,
+    slot_type = "Academic",
+    template_id = null,
+    day_of_week = null
+  } = req.body;
+
+  db.sequelize
+    .query(
+      `CALL EnhancedTimeSlots(:query_type, :slot_id, :school_id, :section, :slot_name, :start_time, :end_time, :slot_type, :template_id, :day_of_week)`,
+      {
+        replacements: {
+          query_type,
+          slot_id,
+          school_id: req.user.school_id ?? school_id,
+          section,
+          slot_name,
+          start_time,
+          end_time,
+          slot_type,
+          template_id,
+          day_of_week,
+        },
+      }
+    )
+    .then((results) => res.json({ success: true, data: results }))
+    .catch((err) => {
+      console.error("Database Error in enhanced_time_slots:", err);
+      res.status(500).json({ success: false, error: err.message });
+    });
+};
+
+// Get Nigerian school templates
+const get_nigerian_templates = async (req, res) => {
+  try {
+    const { school_level, region = 'all' } = req.query;
+    
+    const result = await EnhancedTimeSlotService.getNigerianTemplates(school_level, region);
+    
+    if (result.success) {
+      res.json(result);
+    } else {
+      res.status(500).json(result);
+    }
+  } catch (error) {
+    console.error('Error in get_nigerian_templates:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+// Generate time slots from Nigerian template
+const generate_from_template = async (req, res) => {
+  try {
+    const { template_id, section } = req.body;
+    const school_id = req.user.school_id;
+    
+    if (!template_id || !section) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'template_id and section are required' 
+      });
+    }
+    
+    const result = await EnhancedTimeSlotService.generateFromTemplate(template_id, school_id, section);
+    
+    if (result.success) {
+      // Save generated slots to database
+      const promises = result.data.map(slot => {
+        return db.sequelize.query(
+          `INSERT INTO enhanced_time_slots 
+           (slot_id, school_id, section, slot_name, start_time, end_time, duration_minutes, slot_type, template_id, day_of_week, is_active, activities)
+           VALUES (:slot_id, :school_id, :section, :slot_name, :start_time, :end_time, :duration_minutes, :slot_type, :template_id, :day_of_week, :is_active, :activities)
+           ON DUPLICATE KEY UPDATE updated_at = NOW()`,
+          {
+            replacements: slot,
+            type: db.sequelize.QueryTypes.INSERT
+          }
+        );
+      });
+      
+      await Promise.all(promises);
+      
+      res.json({ 
+        success: true, 
+        message: `Generated ${result.data.length} time slots from Nigerian template`,
+        data: result.data 
+      });
+    } else {
+      res.status(500).json(result);
+    }
+  } catch (error) {
+    console.error('Error in generate_from_template:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+// Get teacher assignments for AI optimization
+const get_teacher_assignments = async (req, res) => {
+  try {
+    const { section } = req.query;
+    const school_id = req.user.school_id;
+    
+    const result = await EnhancedTimeSlotService.getTeacherAssignments(school_id, section);
+    
+    res.json(result);
+  } catch (error) {
+    console.error('Error in get_teacher_assignments:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+// AI-powered timetable generation
+const generate_ai_timetable = async (req, res) => {
+  try {
+    const { section, apply_cultural_rules = true } = req.body;
+    const school_id = req.user.school_id;
+    
+    if (!section) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'section is required' 
+      });
+    }
+    
+    // Get existing time slots for this section
+    const timeSlots = await db.sequelize.query(
+      `SELECT * FROM enhanced_time_slots 
+       WHERE school_id = :school_id AND section = :section AND is_active = TRUE
+       ORDER BY day_of_week, start_time`,
+      {
+        replacements: { school_id, section },
+        type: db.sequelize.QueryTypes.SELECT
+      }
+    );
+    
+    if (timeSlots.length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'No time slots configured for this section. Please create time slots first.'
+      });
+    }
+    
+    // Get teacher assignments
+    const assignmentsResult = await EnhancedTimeSlotService.getTeacherAssignments(school_id, section);
+    if (!assignmentsResult.success) {
+      return res.status(500).json(assignmentsResult);
+    }
+    
+    // Apply Nigerian education optimization
+    let optimizedSlots = EnhancedTimeSlotService.applyNigerianOptimization(
+      timeSlots, 
+      assignmentsResult.data
+    );
+    
+    // Apply cultural rules if requested
+    if (apply_cultural_rules) {
+      const culturalResult = await CulturalScheduleService.integratePrayerTimes(optimizedSlots, school_id);
+      if (culturalResult.success) {
+        optimizedSlots = culturalResult.data;
+      }
+    }
+    
+    // Generate lesson_time_table entries from optimized slots
+    const timetableEntries = [];
+    const classes = await db.sequelize.query(
+      `SELECT DISTINCT class_code, class_name FROM teacher_classes WHERE school_id = :school_id AND section = :section`,
+      {
+        replacements: { school_id, section },
+        type: db.sequelize.QueryTypes.SELECT
+      }
+    );
+    
+    for (const classInfo of classes) {
+      for (const slot of optimizedSlots) {
+        if (slot.slot_type === 'Academic') {
+          // Find a teacher assignment for this slot
+          const assignment = assignmentsResult.data.find(a => 
+            a.class_code === classInfo.class_code && 
+            a.subject_priority === 'high' // Prioritize high priority subjects
+          ) || assignmentsResult.data.find(a => a.class_code === classInfo.class_code);
+          
+          if (assignment) {
+            const entry = {
+              day: slot.day_of_week || 'Monday',
+              class_code: classInfo.class_code,
+              class_name: classInfo.class_name,
+              subject: assignment.subject_name,
+              subject_code: assignment.subject_code,
+              teacher_id: assignment.teacher_id,
+              section: section,
+              start_time: slot.start_time,
+              end_time: slot.end_time,
+              school_id: school_id,
+              status: 'Active'
+            };
+            
+            // Insert into lesson_time_table
+            await db.sequelize.query(
+              `INSERT INTO lesson_time_table 
+               (day, class_code, class_name, subject, subject_code, teacher_id, section, 
+                start_time, end_time, school_id, status, created_at, updated_at)
+               VALUES (:day, :class_code, :class_name, :subject, :subject_code, :teacher_id, 
+                       :section, :start_time, :end_time, :school_id, :status, NOW(), NOW())
+               ON DUPLICATE KEY UPDATE
+               subject = VALUES(subject), teacher_id = VALUES(teacher_id), updated_at = NOW()`,
+              {
+                replacements: entry,
+                type: db.sequelize.QueryTypes.INSERT
+              }
+            );
+            
+            timetableEntries.push(entry);
+          }
+        }
+      }
+    }
+        // Get class information
+        const [classInfo] = await db.sequelize.query(
+          'SELECT class_name, class_code FROM classes WHERE section = :section AND school_id = :school_id LIMIT 1',
+          {
+            replacements: { section, school_id },
+            type: db.sequelize.QueryTypes.SELECT
+          }
+        );
+        
+        if (classInfo) {
+          timetableEntries.push({
+            day: slot.day_of_week,
+            class_name: classInfo.class_name,
+            class_code: classInfo.class_code,
+            subject: slot.subject,
+            teacher_id: slot.teacher_id,
+            section: section,
+            start_time: slot.start_time,
+            end_time: slot.end_time,
+            school_id: school_id,
+            branch_id: req.user.branch_id,
+            status: 'Active'
+          });
+        }
+      }
+    }
+    
+    res.json({
+      success: true,
+      message: `Generated AI-optimized timetable with ${timetableEntries.length} academic periods`,
+      data: {
+        optimized_slots: optimizedSlots,
+        timetable_entries: timetableEntries,
+        optimization_summary: {
+          total_slots: optimizedSlots.length,
+          academic_slots: optimizedSlots.filter(s => s.slot_type === 'Academic').length,
+          assigned_slots: optimizedSlots.filter(s => s.teacher_id).length,
+          morning_stem_slots: optimizedSlots.filter(s => 
+            s.slot_type === 'Academic' && 
+            s.subject_category === 'STEM' && 
+            EnhancedTimeSlotService.timeToMinutes(s.start_time) < 720
+          ).length
+        }
+      }
+    });
+    
+  } catch (error) {
+    console.error('Error in generate_ai_timetable:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+// Get prayer times for Islamic schools
+const get_prayer_times = async (req, res) => {
+  try {
+    const { date } = req.query;
+    const school_id = req.user.school_id;
+    
+    const result = await CulturalScheduleService.getPrayerTimes(school_id, date);
+    
+    res.json(result);
+  } catch (error) {
+    console.error('Error in get_prayer_times:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+// Apply Ramadan schedule adjustments
+const get_ramadan_adjustments = (req, res) => {
+  try {
+    const adjustments = CulturalScheduleService.getRamadanAdjustments();
+    
+    res.json({
+      success: true,
+      data: adjustments,
+      message: 'Ramadan schedule adjustments for Nigerian schools'
+    });
+  } catch (error) {
+    console.error('Error in get_ramadan_adjustments:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+// Bulk operations for time slots
+async function bulk_enhanced_time_slots(req, res) {
+  const timeSlots = Array.isArray(req.body) ? req.body : [req.body];
+
+  const promises = timeSlots.map((slot) => {
+    const {
+      query_type = "create",
+      slot_id = null,
+      school_id = null,
+      section = null,
+      slot_name = null,
+      start_time = null,
+      end_time = null,
+      slot_type = "Academic",
+      template_id = null,
+      day_of_week = null
+    } = slot;
+
+    return db.sequelize.query(
+      `CALL EnhancedTimeSlots(:query_type, :slot_id, :school_id, :section, :slot_name, :start_time, :end_time, :slot_type, :template_id, :day_of_week)`,
+      {
+        replacements: {
+          query_type,
+          slot_id,
+          school_id: req.user.school_id ?? school_id,
+          section,
+          slot_name,
+          start_time,
+          end_time,
+          slot_type,
+          template_id,
+          day_of_week,
+        },
+      }
+    );
+  });
+
+  try {
+    const results = await Promise.all(promises);
+    res.status(200).json({ 
+      success: true, 
+      message: `Processed ${timeSlots.length} time slots`,
+      data: results.flat() 
+    });
+  } catch (error) {
+    console.error("Error during bulk enhanced time slots operation:", error);
+    res.status(500).json({ 
+      success: false, 
+      error: "An error occurred while processing the request" 
+    });
+  }
+}
+
+// Keep existing functions for backward compatibility
+const class_timing = enhanced_time_slots;
+const get_class_timing = (req, res) => {
+  const {
+    query_type = "select",
+    section = null,
+    school_id = null,
+  } = req.query;
+
+  db.sequelize
+    .query(
+      `SELECT * FROM enhanced_time_slots 
+       WHERE school_id = :school_id 
+       AND (:section IS NULL OR section = :section)
+       AND is_active = TRUE
+       ORDER BY day_of_week, start_time`,
+      {
+        replacements: {
+          school_id: school_id ?? req.user.school_id,
+          section,
+        },
+        type: db.sequelize.QueryTypes.SELECT
+      }
+    )
+    .then((results) => {
+      res.json({ success: true, data: results });
+    })
+    .catch((err) => {
+      console.error("Database Error in get_class_timing:", err);
+      res.status(500).json({ success: false, error: err.message });
+    });
+};
+
+const delete_class_timing = (req, res) => {
+  const { id } = req.query;
+
+  db.sequelize
+    .query(
+      `UPDATE enhanced_time_slots SET is_active = FALSE WHERE id = :id`,
+      {
+        replacements: { id },
+        type: db.sequelize.QueryTypes.UPDATE
+      }
+    )
+    .then(() => res.json({ success: true, message: "Time slot deactivated successfully" }))
+    .catch((err) => {
+      console.error("Database Error in delete_class_timing:", err);
+      res.status(500).json({ success: false, error: err.message });
+    });
+};
+
+const bulk_class_timing = bulk_enhanced_time_slots;
+
+const get_time_slots = (req, res) => {
+  const { section = null, school_id = null } = req.query;
+
+  const finalSchoolId = school_id ?? req.user?.school_id;
+  
+  if (!finalSchoolId) {
+    return res.status(400).json({ 
+      success: false, 
+      error: "School ID is required" 
+    });
+  }
+
+  let query = `SELECT DISTINCT 
+    CONCAT(start_time, ' - ', end_time) as label,
+    CONCAT(start_time, ' - ', end_time) as value,
+    start_time,
+    end_time,
+    slot_type as activities,
+    section
+  FROM enhanced_time_slots 
+  WHERE school_id = :school_id AND is_active = TRUE`;
+  
+  const replacements = { school_id: finalSchoolId };
+  
+  if (section) {
+    query += ` AND section = :section`;
+    replacements.section = section;
+  }
+  
+  query += ` ORDER BY start_time ASC`;
+
+  db.sequelize
+    .query(query, {
+      replacements,
+      type: db.sequelize.QueryTypes.SELECT
+    })
+    .then((results) => {
+      res.json({ success: true, data: results });
+    })
+    .catch((err) => {
+      console.error("Database Error in get_time_slots:", err);
+      res.status(500).json({ 
+        success: false, 
+        error: err.message
+      });
+    });
+};
+
+module.exports = {
+  // Enhanced functions
+  enhanced_time_slots,
+  get_nigerian_templates,
+  generate_from_template,
+  get_teacher_assignments,
+  generate_ai_timetable,
+  get_prayer_times,
+  get_ramadan_adjustments,
+};
+
+// Get AI optimization analysis
+const get_optimization_analysis = async (req, res) => {
+  try {
+    const { school_id, section } = req.query;
+    
+    if (!school_id || !section) {
+      return res.status(400).json({
+        success: false,
+        message: "School ID and section are required"
+      });
+    }
+    
+    // Get current timetable
+    const currentTimetable = await db.sequelize.query(
+      `SELECT * FROM lesson_time_table 
+       WHERE school_id = :school_id AND section = :section AND status = 'Active'`,
+      {
+        replacements: { school_id, section },
+        type: db.sequelize.QueryTypes.SELECT
+      }
+    );
+    
+    if (currentTimetable.length === 0) {
+      return res.json({
+        success: true,
+        message: "No timetable found for analysis",
+        data: {
+          has_timetable: false,
+          recommendations: [
+            "Generate an AI-optimized timetable using Nigerian education templates",
+            "Ensure teacher assignments are properly configured",
+            "Consider cultural and religious requirements"
+          ]
+        }
+      });
+    }
+    
+    // Analyze current timetable using optimizer
+    const stemSubjects = ['Mathematics', 'Physics', 'Chemistry', 'Biology', 'Further Mathematics'];
+    
+    const analysis = {
+      total_periods: currentTimetable.length,
+      morning_stem_count: currentTimetable.filter(entry => {
+        const startHour = parseInt(entry.start_time.split(':')[0]);
+        const isMorning = startHour >= 8 && startHour < 12;
+        const isStem = stemSubjects.some(stem => entry.subject.includes(stem));
+        return isMorning && isStem;
+      }).length,
+      total_stem_count: currentTimetable.filter(entry => 
+        stemSubjects.some(stem => entry.subject.includes(stem))
+      ).length,
+      teacher_distribution: {},
+      daily_distribution: {},
+      conflicts: []
+    };
+    
+    // Calculate teacher distribution
+    for (const entry of currentTimetable) {
+      analysis.teacher_distribution[entry.teacher_id] = 
+        (analysis.teacher_distribution[entry.teacher_id] || 0) + 1;
+    }
+    
+    // Calculate daily distribution
+    for (const entry of currentTimetable) {
+      analysis.daily_distribution[entry.day] = 
+        (analysis.daily_distribution[entry.day] || 0) + 1;
+    }
+    
+    // Calculate optimization score
+    const stemOptimization = analysis.total_stem_count > 0 ? 
+      (analysis.morning_stem_count / analysis.total_stem_count) * 100 : 0;
+    
+    const recommendations = [];
+    
+    if (stemOptimization < 70) {
+      recommendations.push(`Improve STEM morning placement: Currently ${stemOptimization.toFixed(1)}%, target 70%+`);
+    }
+    
+    if (Object.keys(analysis.teacher_distribution).length < 3) {
+      recommendations.push("Consider adding more teachers to balance workload");
+    }
+    
+    recommendations.push("Use AI optimization to automatically resolve conflicts and improve efficiency");
+    
+    res.json({
+      success: true,
+      data: {
+        has_timetable: true,
+        analysis,
+        optimization_score: Math.round(stemOptimization),
+        recommendations,
+        next_steps: [
+          "Click 'Generate AI Timetable' to optimize current schedule",
+          "Review teacher assignments for better distribution",
+          "Consider cultural adjustments for prayer times"
+        ]
+      }
+    });
+    
+  } catch (error) {
+    console.error('Error in get_optimization_analysis:', error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to analyze timetable",
+      error: error.message
+    });
+  }
+};
+// Get enhanced time slots
+const get_enhanced_time_slots = async (req, res) => {
+  try {
+    const { school_id, section } = req.query;
+    const result = await db.sequelize.query(
+      `SELECT * FROM enhanced_time_slots WHERE school_id = :school_id AND section = :section ORDER BY day, start_time`,
+      { replacements: { school_id, section }, type: db.sequelize.QueryTypes.SELECT }
+    );
+    res.json({ success: true, data: result });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+// Delete enhanced time slots
+const delete_enhanced_time_slots = async (req, res) => {
+  try {
+    const { school_id, section, ids } = req.body;
+    await db.sequelize.query(
+      `DELETE FROM enhanced_time_slots WHERE school_id = :school_id AND section = :section AND id IN (:ids)`,
+      { replacements: { school_id, section, ids }, type: db.sequelize.QueryTypes.DELETE }
+    );
+    res.json({ success: true, message: "Time slots deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+module.exports = {
+  // Enhanced time slot functions
+  enhanced_time_slots,
+  get_enhanced_time_slots,
+  delete_enhanced_time_slots,
+  get_nigerian_templates,
+  generate_from_template,
+  get_teacher_assignments,
+  get_prayer_times,
+  get_ramadan_adjustments,
+  bulk_enhanced_time_slots,
+  generate_ai_timetable,
+  
+  // Backward compatibility
+  class_timing,
+  get_class_timing,
+  delete_class_timing,
+  bulk_class_timing,
+  get_time_slots,
+};
