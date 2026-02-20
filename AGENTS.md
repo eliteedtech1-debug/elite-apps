@@ -93,6 +93,38 @@ const branch_id = req.headers['x-branch-id'] || req.user.branch_id || null;
 
 ### API: `POST /payments/revenue-expenditure`
 
+### ⚠️ CRITICAL: Payment Status and Soft Deletes
+
+**Excluded Entries = Soft Delete (NOT Hard Delete)**
+
+The system uses `payment_status = 'Excluded'` for soft deletion to maintain:
+- ✅ **Audit trail** - All transactions preserved in database
+- ✅ **Accountability** - Can review what was deleted and why
+- ✅ **Transparency** - Complete financial history maintained
+- ✅ **Compliance** - Meets accounting standards for record retention
+
+**ALWAYS exclude 'Excluded' and 'Cancelled' entries from financial calculations:**
+
+```sql
+-- ✅ CORRECT - Exclude soft-deleted entries
+WHERE payment_status NOT IN ('Excluded', 'Cancelled')
+
+-- ❌ WRONG - Including soft-deleted entries gives incorrect balances
+WHERE 1=1  -- No status filter
+```
+
+**Why Soft Delete?**
+- Hard delete = Data loss, no audit trail ❌
+- Soft delete = Data preserved, auditable, transparent ✅
+
+**100+ queries in the codebase follow this pattern.** See:
+- `ORMPaymentsController.js:935` - "CRITICAL: Exclude items with payment_status='Excluded'"
+- `ormPayments.js:821` - "All queries exclude items with payment_status='Excluded'"
+- `overpaymentController.js:396` - Excludes from payment history
+- `StudentBillingController.js:98-102` - Excludes from all calculations
+
+**When adding new financial queries, ALWAYS filter out Excluded/Cancelled entries!**
+
 ---
 
 ## 🤖 Agent Roster
