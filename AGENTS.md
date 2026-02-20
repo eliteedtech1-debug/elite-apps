@@ -40,6 +40,9 @@
 | `/teacher/add-teacher` | `all_routes.addTeacher` | `peoples/teacher/teacherForm/staffManagementForm.tsx` |
 | `/teacher/teacher-list` | `all_routes.teacherList` | `peoples/teacher/teacher-list/index.tsx` |
 | `/admin-dashboard` | `all_routes.adminDashboard` | `mainMenu/adminDashboard/index.tsx` |
+| `/management/collect-fees` | `all_routes.collectFees` | `management/feescollection/CollectFees.tsx` |
+| `/management/class-payments` | `all_routes.billClasses` | `management/feescollection/BillClasses.tsx` |
+| `/management/family-payments` | `all_routes.familyPayments` | `management/feescollection/ParentPaymentsPage/OptimizedParentPaymentsPage.tsx` |
 
 ---
 
