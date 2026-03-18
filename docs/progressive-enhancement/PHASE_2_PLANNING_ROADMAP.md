@@ -394,7 +394,7 @@ Sync Engine → Local Storage → API Gateway → Backend Services
 ```
 
 #### **Cross-Platform Services**
-- **Authentication Service**: Unified login across platforms
+- **Authentication Service**: Login across platforms
 - **Synchronization Service**: Data consistency management
 - **Notification Service**: Push notification delivery
 - **Analytics Service**: User behavior tracking

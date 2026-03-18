@@ -1,279 +1,241 @@
-# Production Migration Guide - user_activity_log to elite_logs
+# Production Migration Guide - Assignment & Question Bank
 
-## 🎯 Overview
-Move `user_activity_log` from main database to `elite_logs` audit database in production.
+## 🚀 Quick Start (5 minutes)
 
----
-
-## ⚠️ Pre-Migration Checklist
-
-- [ ] **Backup databases** (both main DB and elite_logs)
-- [ ] **Verify .env configuration** on production server
-- [ ] **Test on staging** environment first (if available)
-- [ ] **Schedule maintenance window** (migration takes ~1 minute)
-- [ ] **Notify team** of brief downtime
-
----
-
-## 📋 Step-by-Step Production Migration
-
-### Step 1: Connect to Production Server
-```bash
-ssh user@production-server
-cd /path/to/elscholar-api
-```
-
-### Step 2: Backup Databases
+### Step 1: Backup Database
 ```bash
 # Backup main database
-mysqldump -u root -p kirmaskngov_skcooly_db user_activity_log > backup_user_activity_log_$(date +%Y%m%d_%H%M%S).sql
+mysqldump -u root -p elite_prod_db > backup_elite_prod_$(date +%Y%m%d_%H%M%S).sql
 
-# Backup elite_logs (optional, for safety)
-mysqldump -u root -p elite_logs > backup_elite_logs_$(date +%Y%m%d_%H%M%S).sql
+# Backup content database (if exists)
+mysqldump -u root -p elite_content > backup_elite_content_$(date +%Y%m%d_%H%M%S).sql
 ```
 
-### Step 3: Verify .env Configuration
+### Step 2: Upload Migration Files
 ```bash
-cat .env | grep -E "DB_NAME|AUDIT_DB_NAME"
+# Upload to server
+scp -r elscholar-api/migrations user@server:/path/to/elscholar-api/
+scp elscholar-api/run-assignment-migrations.js user@server:/path/to/elscholar-api/
 ```
 
-**Expected output:**
-```
-DB_NAME=kirmaskngov_skcooly_db
-AUDIT_DB_NAME=elite_logs
-```
-
-### Step 4: Stop API Server (Optional but Recommended)
+### Step 3: Run Migration
 ```bash
-# If using PM2
+# SSH to server
+ssh user@server
+
+# Navigate to API directory
+cd /path/to/elscholar-api
+
+# Run migration (safe to run multiple times)
+node run-assignment-migrations.js
+```
+
+### Step 4: Restart API
+```bash
+# Using PM2
+pm2 restart elscholar-api
+
+# Or using systemd
+sudo systemctl restart elscholar-api
+
+# Or manual
+npm run start
+```
+
+### Step 5: Verify
+```bash
+# Check if procedures updated
+mysql -u root -p elite_prod_db -e "SHOW PROCEDURE STATUS WHERE Name='assignments'"
+
+# Check if columns added
+mysql -u root -p elite_prod_db -e "DESCRIBE assignments" | grep difficulty
+
+# Check if question bank exists
+mysql -u root -p elite_content -e "SHOW TABLES LIKE 'question_bank'"
+```
+
+## ✅ Migration Checklist
+
+- [ ] Database backup completed
+- [ ] Migration files uploaded
+- [ ] Migration script executed successfully
+- [ ] No errors in output
+- [ ] API restarted
+- [ ] Test assignment creation works
+- [ ] Test question bank access works
+- [ ] Check logs for errors
+
+## 🔧 Troubleshooting
+
+### Issue: "Table doesn't exist"
+```bash
+# Create elite_content database if missing
+mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS elite_content"
+
+# Re-run migration
+node run-assignment-migrations.js
+```
+
+### Issue: "Column already exists"
+**Solution:** This is fine! Migration is idempotent. It will skip existing columns.
+
+### Issue: "Procedure syntax error"
+**Solution:** Migration script automatically strips DELIMITER statements. If error persists:
+```bash
+# Check MySQL version
+mysql --version
+
+# Should be MySQL 5.7+ or MariaDB 10.2+
+```
+
+### Issue: "Permission denied"
+```bash
+# Grant permissions
+mysql -u root -p -e "GRANT ALL PRIVILEGES ON elite_prod_db.* TO 'your_user'@'localhost'"
+mysql -u root -p -e "GRANT ALL PRIVILEGES ON elite_content.* TO 'your_user'@'localhost'"
+mysql -u root -p -e "FLUSH PRIVILEGES"
+```
+
+## 🔄 Rollback (if needed)
+
+### Option 1: Restore from backup
+```bash
+# Stop API
 pm2 stop elscholar-api
 
-# If using systemd
-sudo systemctl stop elscholar-api
+# Restore database
+mysql -u root -p elite_prod_db < backup_elite_prod_YYYYMMDD_HHMMSS.sql
+mysql -u root -p elite_content < backup_elite_content_YYYYMMDD_HHMMSS.sql
 
-# If using screen/tmux, stop the process
+# Restart API
+pm2 start elscholar-api
 ```
 
-### Step 5: Run Migration
+### Option 2: Drop new columns (not recommended)
+```sql
+-- Only if absolutely necessary
+ALTER TABLE assignments 
+  DROP COLUMN difficulty,
+  DROP COLUMN estimated_time,
+  DROP COLUMN passing_score;
+  -- etc...
+```
+
+## 📊 What Gets Migrated
+
+### Database: elite_prod_db
+1. **assignments** table - 10 new columns
+2. **assignment_questions** table - 6 new columns
+3. **assignment_responses** table - 4 new columns
+4. **assignment_templates** table - Created
+5. **assignment_statistics** table - Created
+6. **question_performance** table - Created
+7. **student_assignment_performance** table - Created
+8. **grading_rubrics** table - Created
+9. **assignments()** stored procedure - Updated
+10. **assignment_questions()** stored procedure - Updated
+11. **calculateAssignmentStatistics()** stored procedure - Created
+
+### Database: elite_content
+1. **question_bank** table - Created (if not exists)
+2. **question_categories** table - Created (if not exists)
+3. **question_category_map** table - Created (if not exists)
+
+## ⚡ Zero-Downtime Migration
+
+For production with active users:
+
 ```bash
-cd src/migrations
-chmod +x run_user_activity_log_migration.sh
-./run_user_activity_log_migration.sh
-```
+# 1. Run migration (doesn't affect running API)
+node run-assignment-migrations.js
 
-**Expected output:**
-```
-📋 Migration Configuration:
-   Main DB: kirmaskngov_skcooly_db
-   Audit DB: elite_logs
-
-🔄 Running migration...
-source_db           record_count
-kirmaskngov_skcooly_db    XXX
-elite_logs               XXX
-
-✅ Migration completed successfully!
-```
-
-### Step 6: Verify Migration
-```bash
-# Check record count in elite_logs
-mysql -u root -p elite_logs -e "SELECT COUNT(*) as total FROM user_activity_log;"
-
-# Check recent records
-mysql -u root -p elite_logs -e "SELECT * FROM user_activity_log ORDER BY created_at DESC LIMIT 5;"
-
-# Verify old table still exists (before dropping)
-mysql -u root -p kirmaskngov_skcooly_db -e "SHOW TABLES LIKE 'user_activity_log';"
-```
-
-### Step 7: Deploy Updated Code
-```bash
-# Pull latest code with environment-based database names
+# 2. Deploy new code (PM2 will reload gracefully)
 git pull origin main
-
-# Install dependencies (if needed)
 npm install
+pm2 reload elscholar-api --update-env
 
-# Or copy updated files manually:
-# - src/config/dbNames.js
-# - src/controllers/profileController.js
-# - src/controllers/adminProfileController.js
-# - src/middleware/profileAccessControl.js
-# - src/routes/user.js
-# - src/services/passwordService.js
+# 3. Verify
+curl http://localhost:34567/health
 ```
 
-### Step 8: Start API Server
+## 🧪 Test After Migration
+
 ```bash
-# If using PM2
-pm2 start elscholar-api
-pm2 logs elscholar-api --lines 50
-
-# If using systemd
-sudo systemctl start elscholar-api
-sudo journalctl -u elscholar-api -f
-
-# Check for errors
-tail -f logs/error.log
-```
-
-### Step 9: Test Activity Logging
-```bash
-# Test security settings update (triggers activity log)
-curl -X PUT 'https://your-domain.com/users/security-settings' \
-  -H 'Content-Type: application/json' \
+# Test assignment creation
+curl -X POST 'http://your-server/assignments' \
   -H 'Authorization: Bearer YOUR_TOKEN' \
-  -d '{"user_id": "TEST_USER", "user_type": "teacher", "sms_notifications": true}'
+  -H 'Content-Type: application/json' \
+  --data '{"query_type":"create","title":"Test","difficulty":"medium",...}'
 
-# Verify log was created in elite_logs
-mysql -u root -p elite_logs -e "SELECT * FROM user_activity_log ORDER BY created_at DESC LIMIT 1;"
+# Test question bank
+curl 'http://your-server/api/question-bank/statistics' \
+  -H 'Authorization: Bearer YOUR_TOKEN'
+
+# Test templates
+curl 'http://your-server/api/assignment-templates' \
+  -H 'Authorization: Bearer YOUR_TOKEN'
 ```
 
-### Step 10: Drop Old Table (After Verification)
-```bash
-# Wait 24-48 hours to ensure everything works
-# Then drop the old table
-mysql -u root -p kirmaskngov_skcooly_db -e "DROP TABLE IF EXISTS user_activity_log;"
+## 📝 Migration Output
+
+**Success looks like:**
+```
+🚀 Running Assignment & Question Bank Migrations...
+
+🔍 Checking current schema...
+1️⃣  Updating assignments stored procedure...
+✅ Assignments procedure updated
+
+2️⃣  Updating assignment_questions stored procedure...
+✅ Assignment questions procedure updated
+
+3️⃣  Checking question bank tables...
+✅ Question bank tables already exist
+
+4️⃣  Checking enhanced assignment fields...
+✅ Enhanced fields already exist
+
+🎉 All migrations completed successfully!
+
+📊 Summary:
+   - Assignments procedure: ✅ Updated
+   - Assignment questions procedure: ✅ Updated
+   - Question bank tables: ✅ Ready
+   - Enhanced fields: ✅ Ready
+   - Templates: ✅ Ready
+   - Categories: ✅ Ready
+
+✨ Safe to run multiple times!
+
+✅ Ready to use!
 ```
 
----
+## 🔒 Safety Features
 
-## 🔄 Rollback Plan (If Issues Occur)
-
-### If migration fails or issues found:
-
-```bash
-# 1. Stop API server
-pm2 stop elscholar-api
-
-# 2. Restore from backup
-mysql -u root -p kirmaskngov_skcooly_db < backup_user_activity_log_YYYYMMDD_HHMMSS.sql
-
-# 3. Revert code changes
-git checkout HEAD~1 -- src/config/dbNames.js
-git checkout HEAD~1 -- src/controllers/profileController.js
-git checkout HEAD~1 -- src/controllers/adminProfileController.js
-git checkout HEAD~1 -- src/middleware/profileAccessControl.js
-git checkout HEAD~1 -- src/routes/user.js
-git checkout HEAD~1 -- src/services/passwordService.js
-
-# 4. Restart API server
-pm2 start elscholar-api
-```
-
----
-
-## 🚨 Troubleshooting
-
-### Issue: "Table doesn't exist" error
-**Solution:** Migration script handles this gracefully. If source table doesn't exist, it skips copy.
-
-### Issue: "Duplicate entry" error
-**Solution:** Migration uses `NOT EXISTS` check to prevent duplicates. Safe to re-run.
-
-### Issue: API can't connect to elite_logs
-**Solution:** 
-```bash
-# Check database exists
-mysql -u root -p -e "SHOW DATABASES LIKE 'elite_logs';"
-
-# Check user permissions
-mysql -u root -p -e "SHOW GRANTS FOR 'your_db_user'@'localhost';"
-
-# Grant permissions if needed
-mysql -u root -p -e "GRANT ALL PRIVILEGES ON elite_logs.* TO 'your_db_user'@'localhost';"
-```
-
-### Issue: Activity logs not appearing
-**Solution:**
-```bash
-# Check API logs
-tail -f logs/error.log
-
-# Test database connection
-mysql -u root -p elite_logs -e "SELECT 1;"
-
-# Verify AUDIT_DB_NAME in .env
-cat .env | grep AUDIT_DB_NAME
-```
-
----
-
-## ✅ Post-Migration Verification
-
-Run these checks 24 hours after migration:
-
-```bash
-# 1. Check activity log growth
-mysql -u root -p elite_logs -e "
-  SELECT 
-    DATE(created_at) as date,
-    COUNT(*) as activities
-  FROM user_activity_log 
-  WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAYS)
-  GROUP BY DATE(created_at)
-  ORDER BY date DESC;
-"
-
-# 2. Verify no errors in logs
-grep -i "user_activity_log" logs/error.log
-
-# 3. Check API health
-curl https://your-domain.com/health
-
-# 4. Monitor database size
-mysql -u root -p -e "
-  SELECT 
-    table_schema AS 'Database',
-    ROUND(SUM(data_length + index_length) / 1024 / 1024, 2) AS 'Size (MB)'
-  FROM information_schema.tables 
-  WHERE table_schema IN ('kirmaskngov_skcooly_db', 'elite_logs')
-  GROUP BY table_schema;
-"
-```
-
----
-
-## 📊 Expected Results
-
-**Before Migration:**
-- `kirmaskngov_skcooly_db.user_activity_log` - XXX records
-- `elite_logs.user_activity_log` - 0 records
-
-**After Migration:**
-- `kirmaskngov_skcooly_db.user_activity_log` - XXX records (unchanged)
-- `elite_logs.user_activity_log` - XXX records (copied)
-
-**After Cleanup (24-48 hours later):**
-- `kirmaskngov_skcooly_db.user_activity_log` - dropped
-- `elite_logs.user_activity_log` - XXX+ records (growing)
-
----
+1. ✅ **Idempotent** - Safe to run multiple times
+2. ✅ **Checks before creating** - Won't duplicate tables/columns
+3. ✅ **Default values** - Existing data won't break
+4. ✅ **NULL allowed** - Optional fields are nullable
+5. ✅ **Backward compatible** - Old code still works
+6. ✅ **No data loss** - Only adds, never removes
 
 ## 📞 Support
 
-If issues occur during migration:
-1. **Don't panic** - migration is reversible
-2. **Check logs** - `logs/error.log` and `pm2 logs`
-3. **Verify .env** - ensure AUDIT_DB_NAME is set
-4. **Rollback if needed** - use backup files
-5. **Contact team** - provide error messages and logs
+If migration fails:
+1. Check error message in output
+2. Verify database credentials
+3. Check MySQL version compatibility
+4. Review backup before rollback
+5. Contact dev team with error logs
+
+## ⏱️ Estimated Time
+
+- Small DB (<1000 assignments): 30 seconds
+- Medium DB (1000-10000): 1-2 minutes
+- Large DB (>10000): 2-5 minutes
+
+**Downtime:** 0 seconds (if using PM2 reload)
 
 ---
 
-## 🎉 Success Criteria
-
-✅ Migration script completes without errors  
-✅ Record counts match between source and destination  
-✅ API starts successfully  
-✅ New activity logs appear in elite_logs  
-✅ No errors in application logs  
-✅ Security settings updates work correctly  
-
----
-
-**Estimated Downtime:** 2-5 minutes  
-**Risk Level:** Low (fully reversible)  
-**Tested:** ✅ Development environment  
-**Safe for Production:** ✅ Yes
+**Ready to migrate!** 🚀

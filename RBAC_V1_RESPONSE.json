@@ -1,0 +1,357 @@
+{
+  "success": true,
+  "data": [
+    {
+      "name": "Personal Data Mngr",
+      "items": [
+        {
+          "label": "Students",
+          "link": null,
+          "icon": "ti ti-school",
+          "submenu": true,
+          "submenuItems": [
+            {
+              "label": "Student List",
+              "link": "/student/student-list",
+              "icon": "ti ti-list"
+            },
+            {
+              "label": "Class List",
+              "link": "/academic/class-list",
+              "icon": "ti ti-list"
+            },
+            {
+              "label": "Promotion & Graduation",
+              "link": "/students/promotion",
+              "icon": "fa fa-table"
+            },
+            {
+              "label": "Add Student",
+              "link": "/student/add-student",
+              "icon": "ti ti-user-plus"
+            },
+            {
+              "label": "ID Card Generator",
+              "link": "/student/id-card-generator",
+              "icon": "ti ti-id-badge"
+            }
+          ]
+        },
+        {
+          "label": "Student Attendance",
+          "link": null,
+          "icon": "ti ti-calendar-check",
+          "submenu": true,
+          "submenuItems": [
+            {
+              "label": "Scan",
+              "link": "/attendance/quick-scanner",
+              "icon": "fas fa-qrcode"
+            },
+            {
+              "label": "Reports 📊",
+              "link": "/attendance/dashboard",
+              "icon": "ti ti-chart-bar"
+            },
+            {
+              "label": "Mark Attendance",
+              "link": "/academic/attendance-register",
+              "icon": "ti ti-school"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Class Management",
+      "items": [
+        {
+          "label": "Daily Routine",
+          "link": null,
+          "icon": "fa fa-gears",
+          "submenu": true,
+          "submenuItems": [
+            {
+              "label": "Class Time Table",
+              "link": "/academic/class-time-table",
+              "icon": "ti ti-table"
+            },
+            {
+              "label": "Class Attendance",
+              "link": "/academic/attendance-register",
+              "icon": "ti ti-id-badge"
+            },
+            {
+              "label": "My Pay Slip",
+              "link": "/my-payslip",
+              "icon": "ti ti-receipt"
+            },
+            {
+              "label": "Lessons",
+              "link": "/academic/tearcher-lessons",
+              "icon": "ti ti-book"
+            },
+            {
+              "label": "Assignments",
+              "link": "/academic/class-assignment",
+              "icon": "ti ti-license"
+            }
+          ]
+        },
+        {
+          "label": "Teaching Tools",
+          "link": null,
+          "icon": "fa fa-gears",
+          "submenu": true,
+          "submenuItems": [
+            {
+              "label": "Virtual Class",
+              "link": "/application/video-call",
+              "icon": "ti ti-receipt"
+            },
+            {
+              "label": "Generate Assessment",
+              "link": "/academic/assessment-generator",
+              "icon": "ti ti-clipboard-check"
+            },
+            {
+              "label": "Recitation",
+              "link": "/academic/recitation",
+              "icon": "ti-microphone"
+            }
+          ]
+        },
+        {
+          "label": "Syllabus",
+          "link": "",
+          "icon": "ti ti-book",
+          "submenu": true,
+          "submenuItems": [
+            {
+              "label": "Lesson Plan",
+              "link": "/academic/teacher-syllabus-hub",
+              "icon": "ti ti-plus"
+            },
+            {
+              "label": "Lesson Plans Review",
+              "link": "/academic/admin-lesson-plans",
+              "icon": "ti ti-search"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "General Setups",
+      "items": [
+        {
+          "label": "School Setup",
+          "link": "",
+          "icon": "fa fa-gears",
+          "submenu": true,
+          "submenuItems": [
+            {
+              "label": "Academic Calendar",
+              "link": "/school-setup/academic-year-setup",
+              "icon": "ti ti-calendar"
+            },
+            {
+              "label": "Subjects Setup",
+              "link": "/academic/subjects",
+              "icon": "ti ti-book"
+            },
+            {
+              "label": "Personal Dev. Setup",
+              "link": "/academic/character-subjects",
+              "icon": "ti ti-book"
+            },
+            {
+              "label": "Assessment Setup",
+              "link": "/academic/ca-setup",
+              "icon": "ti ti-book"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Exams & Records",
+      "items": [
+        {
+          "label": "Examinations",
+          "link": null,
+          "icon": "ti ti-certificate",
+          "submenu": true,
+          "submenuItems": [
+            {
+              "label": "FormMaster Review",
+              "link": "/academic/formmaster-score-sheet",
+              "icon": "fa fa-clipboard-list"
+            },
+            {
+              "label": "Reports Generator",
+              "link": "/academic/reports/Exam",
+              "icon": "fa fa-file-alt"
+            },
+            {
+              "label": "Broad Sheet",
+              "link": "/academic/broad-sheet",
+              "icon": "fa fa-table"
+            },
+            {
+              "label": "Exam Analytics",
+              "link": "/academic/exam-analytics",
+              "icon": "fa fa-chart-bar"
+            },
+            {
+              "label": "Report Template",
+              "link": "/academic/report-configuration",
+              "icon": "fa fa-cog"
+            },
+            {
+              "label": "CA/Exam Setup",
+              "link": "/examinations/ca-setup",
+              "icon": "fa fa-cogs"
+            },
+            {
+              "label": "Submit Questions",
+              "link": "/examinations/submit-questions",
+              "icon": "fa fa-upload"
+            },
+            {
+              "label": "Moderation",
+              "link": "/examinations/moderation",
+              "icon": "fa fa-check-circle"
+            },
+            {
+              "label": "Print Questions",
+              "link": "/examinations/print-questions",
+              "icon": "fa fa-print"
+            },
+            {
+              "label": "Progress Tracking",
+              "link": "/examinations/progress",
+              "icon": "fa fa-tasks"
+            },
+            {
+              "label": "Print Answer Sheets",
+              "link": "/academic/print-answer-sheets",
+              "icon": "ti-file-text"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Supply Management",
+      "items": [
+        {
+          "label": "Retail Store",
+          "link": "",
+          "icon": "ti ti-shopping-cart",
+          "submenu": true,
+          "submenuItems": [
+            {
+              "label": "Store Dashboard",
+              "link": "/supply-management/inventory/dashboard",
+              "icon": "ti ti-dashboard"
+            },
+            {
+              "label": "Products",
+              "link": "/supply-management/inventory/products",
+              "icon": "ti ti-list"
+            },
+            {
+              "label": "Purchases",
+              "link": "/supply-management/inventory/purchase-orders",
+              "icon": "ti ti-file-invoice"
+            },
+            {
+              "label": "Sales History",
+              "link": "/supply-management/inventory/sales",
+              "icon": "ti ti-shopping-cart"
+            },
+            {
+              "label": "POS / New Sale",
+              "link": "/supply-management/inventory/quick-sale",
+              "icon": "ti ti-cash"
+            },
+            {
+              "label": "Suppliers",
+              "link": "/supply-management/inventory/suppliers",
+              "icon": "ti ti-truck"
+            },
+            {
+              "label": "Reports",
+              "link": "/supply-management/inventory/analytics",
+              "icon": "ti ti-chart-bar"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Messaging",
+      "items": [
+        {
+          "label": "Announcements",
+          "link": "",
+          "icon": "ti ti-clock",
+          "submenu": true,
+          "submenuItems": [
+            {
+              "label": "System Notifications",
+              "link": "/system/notifications",
+              "icon": "ti ti-bell"
+            },
+            {
+              "label": "Notice Board Management",
+              "link": "/announcements/notice-board-admin",
+              "icon": "edit"
+            },
+            {
+              "label": "Notice Board",
+              "link": "/announcements/notice-board-view",
+              "icon": "eye"
+            }
+          ]
+        },
+        {
+          "label": "Communications",
+          "link": null,
+          "icon": "ti ti-message-circle",
+          "submenu": true,
+          "submenuItems": [
+            {
+              "label": "Dashboard",
+              "link": "/communications/dashboard",
+              "icon": "ti ti-dashboard"
+            },
+            {
+              "label": "Sent Messages",
+              "link": "/communications/sent-messages",
+              "icon": "ti ti-send"
+            },
+            {
+              "label": "Configuration",
+              "link": "/communication/setup",
+              "icon": "ti ti-settings"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "package": "Elite",
+  "user_type": "exam_officer",
+  "debug": {
+    "totalMenuItems": 70,
+    "userRoles": [
+      "exam_officer",
+      "teacher"
+    ],
+    "effectivePackage": 4,
+    "schoolId": "SCH/14",
+    "expectedCount": 124
+  }
+}

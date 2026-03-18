@@ -62,6 +62,7 @@
       {"key": "CLASSES", "label": "Classes", "type": "link", "route": "/classes"},
       {"key": "SUBJECTS", "label": "Subjects", "type": "link", "route": "/subjects"},
       {"key": "TIMETABLE", "label": "Timetable", "type": "link", "route": "/timetable"},
+      {"key": "QUESTION_BANK", "label": "Question Bank", "type": "link", "route": "/academic/question-bank"},
       {"key": "VIRTUAL_CLASS", "label": "Virtual Class", "type": "link", "route": "/application/video-call", "premium": true}
     ]
   },
