@@ -468,4 +468,4 @@ git commit -m "perf(admission): optimize admission queries [Gemini]"
 **Version:** 1.0  
 **Last Updated:** 2025-12-13  
 **Strategy:** Claude → OpenCode → Gemini  
-**Project:** Elite Scholar - Admission Application Module
+**Project:** Elite Core - Admission Application Module

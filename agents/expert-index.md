@@ -1,6 +1,6 @@
 # Expert Agent Directory
 
-> **Quick Reference Guide for Elite Scholar AI Agents**
+> **Quick Reference Guide for Elite Core AI Agents**
 > 
 > **Last Updated:** 2025-12-13
 
@@ -261,4 +261,4 @@ agents/
 
 **Version:** 1.0  
 **Compatible with:** Claude, OpenCode, Gemini  
-**Maintained by:** Elite Scholar Development Team
+**Maintained by:** Elite Core Development Team

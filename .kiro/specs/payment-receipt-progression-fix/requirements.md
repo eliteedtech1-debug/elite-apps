@@ -2,7 +2,7 @@
 
 ## Introduction
 
-The Elite Scholar payment receipt system has critical issues that prevent proper receipt generation and payment progression display. The system currently fails to show payment progression in receipts and throws JavaScript errors when accessing payment data. This specification addresses these issues to ensure receipts accurately reflect payment history and provide clear payment progression tracking.
+The Elite Core payment receipt system has critical issues that prevent proper receipt generation and payment progression display. The system currently fails to show payment progression in receipts and throws JavaScript errors when accessing payment data. This specification addresses these issues to ensure receipts accurately reflect payment history and provide clear payment progression tracking.
 
 ## Glossary
 

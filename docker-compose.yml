@@ -32,7 +32,7 @@ services:
     networks:
       - elite_network
 
-  # Elite Scholar Application
+  # Elite Core Application
   app:
     build:
       context: .

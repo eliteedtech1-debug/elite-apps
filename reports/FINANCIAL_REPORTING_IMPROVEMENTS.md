@@ -1,4 +1,4 @@
-# Financial Record-Keeping and Reporting Improvements for Elite Scholar
+# Financial Record-Keeping and Reporting Improvements for Elite Core
 
 **Date:** 2026-02-22  
 **Status:** Research & Recommendations  
@@ -8,7 +8,7 @@
 
 ## Executive Summary
 
-Based on research into school financial management best practices and accounting standards, this document outlines recommendations to improve Elite Scholar's financial record-keeping and reporting system. The focus is on accuracy, compliance, audit readiness, and decision-making support.
+Based on research into school financial management best practices and accounting standards, this document outlines recommendations to improve Elite Core's financial record-keeping and reporting system. The focus is on accuracy, compliance, audit readiness, and decision-making support.
 
 ---
 
@@ -134,7 +134,7 @@ If one person can:
 - Role: Review and reconcile accounts monthly
 - System: Compare bank statements to system records
 
-#### Implementation in Elite Scholar
+#### Implementation in Elite Core
 
 **User Roles:**
 - `cashier`: Receive payments, generate receipts (Custody)
@@ -316,7 +316,7 @@ If one person can:
 **Shows:** What the school owns (assets) vs owes (liabilities) at a point in time
 
 ```
-ELITE SCHOLAR - BALANCE SHEET
+ELITE CORE - BALANCE SHEET
 As of December 31, 2026
 
 ASSETS
@@ -358,7 +358,7 @@ TOTAL LIABILITIES + EQUITY                   ₦5,505,000
 **Shows:** Actual cash in and out (critical for cash management)
 
 ```
-ELITE SCHOLAR - CASH FLOW STATEMENT
+ELITE CORE - CASH FLOW STATEMENT
 For the Year Ended December 31, 2026
 
 OPERATING ACTIVITIES
@@ -385,7 +385,7 @@ Cash at End of Year                            ₦50,000
 **Shows:** Performance against budget (variance analysis)
 
 ```
-ELITE SCHOLAR - BUDGET VS ACTUAL
+ELITE CORE - BUDGET VS ACTUAL
 For the Month of February 2026
 
                         Budget      Actual    Variance    %
@@ -408,7 +408,7 @@ NET INCOME           (₦105,000)  (₦141,100)  (₦36,100)  -34%
 **Shows:** How long invoices have been unpaid
 
 ```
-ELITE SCHOLAR - ACCOUNTS RECEIVABLE AGING
+ELITE CORE - ACCOUNTS RECEIVABLE AGING
 As of February 22, 2026
 
 Student         Class    Total Due   Current   1-30 Days   31-60 Days   60+ Days
@@ -425,7 +425,7 @@ Percentage                 100%        52%         26%         18%          4%
 **Shows:** RECURRENT vs CAPITAL vs MISCELLANEOUS breakdown
 
 ```
-ELITE SCHOLAR - EXPENSE ANALYSIS BY TYPE
+ELITE CORE - EXPENSE ANALYSIS BY TYPE
 For the Year Ended December 31, 2026
 
 Type                Amount      % of Total   Budget      Variance
@@ -847,7 +847,7 @@ Benchmark: 60-70% for schools
 
 ## Conclusion
 
-Improving financial record-keeping and reporting is not just about compliance—it's about making better decisions, preventing fraud, and ensuring the long-term sustainability of Elite Scholar. The recommendations in this document are based on industry best practices and can be implemented incrementally.
+Improving financial record-keeping and reporting is not just about compliance—it's about making better decisions, preventing fraud, and ensuring the long-term sustainability of Elite Core. The recommendations in this document are based on industry best practices and can be implemented incrementally.
 
 **Key Takeaways:**
 1. Choose an accounting method and stick to it (recommend accrual)
@@ -865,7 +865,7 @@ Improving financial record-keeping and reporting is not just about compliance—
 ---
 
 **Document prepared by:** AI Assistant (Kiro)  
-**For:** Elite Scholar Management  
+**For:** Elite Core Management  
 **Date:** February 22, 2026  
 **Version:** 1.0
 

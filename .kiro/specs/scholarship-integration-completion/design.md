@@ -2,7 +2,7 @@
 
 ## Overview
 
-The scholarship integration completion system builds upon the existing Elite Scholar School Management System to provide seamless scholarship discount application throughout the billing and payment workflow. The system leverages the existing database schema with scholarship fields in the students table and extends the current ORM-based payment processing architecture to include scholarship-aware calculations and GAAP-compliant accounting treatment.
+The scholarship integration completion system builds upon the existing Elite Core School Management System to provide seamless scholarship discount application throughout the billing and payment workflow. The system leverages the existing database schema with scholarship fields in the students table and extends the current ORM-based payment processing architecture to include scholarship-aware calculations and GAAP-compliant accounting treatment.
 
 The design focuses on completing the missing backend API endpoints that the frontend is already calling, ensuring that scholarship discounts are automatically applied during fee publishing, properly reflected in invoices, and correctly processed during payments while maintaining full accounting compliance.
 

@@ -2,7 +2,7 @@
 
 ## Overview
 
-This implementation plan addresses the online staff visibility bug in the Elite Scholar support chat system. The fix involves correcting a React useEffect dependency array issue, removing debug output, and adding user preference tracking to ensure the "Online Staff" section displays automatically when agents are available.
+This implementation plan addresses the online staff visibility bug in the Elite Core support chat system. The fix involves correcting a React useEffect dependency array issue, removing debug output, and adding user preference tracking to ensure the "Online Staff" section displays automatically when agents are available.
 
 ## Tasks
 

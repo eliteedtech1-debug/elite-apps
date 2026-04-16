@@ -45,7 +45,7 @@ DESCRIBE school_bank_accounts;
 -- INSERT INTO school_bank_accounts
 -- (school_id, branch_id, account_name, account_number, bank_name, bank_code, is_default, status)
 -- VALUES
--- ('SCH/1', 'default', 'Elite Scholar Academy', '0123456789', 'First Bank of Nigeria', '011', 1, 'Active');
+-- ('SCH/1', 'default', 'Elite Core Academy', '0123456789', 'First Bank of Nigeria', '011', 1, 'Active');
 
 -- ========================================================================
 -- ROLLBACK SCRIPT (If needed)

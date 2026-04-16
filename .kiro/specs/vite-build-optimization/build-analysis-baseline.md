@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-The Elite Scholar React application currently suffers from significant bundle size issues and mixed import patterns that prevent proper code splitting. The analysis reveals **6 chunks exceeding 1000 kB** after minification, with the largest being 2,123.77 kB (react-pdf.browser). The current Vite configuration has basic manual chunks but lacks comprehensive optimization for the application's scale.
+The Elite Core React application currently suffers from significant bundle size issues and mixed import patterns that prevent proper code splitting. The analysis reveals **6 chunks exceeding 1000 kB** after minification, with the largest being 2,123.77 kB (react-pdf.browser). The current Vite configuration has basic manual chunks but lacks comprehensive optimization for the application's scale.
 
 ## Current Build Configuration Analysis
 

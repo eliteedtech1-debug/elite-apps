@@ -1,5 +1,5 @@
 -- =====================================================
--- RBAC System Migration - Elite Scholar
+-- RBAC System Migration - Elite Core
 -- Description: Create comprehensive Role-Based Access Control tables
 -- Author: Claude Code
 -- Date: 2025-11-19

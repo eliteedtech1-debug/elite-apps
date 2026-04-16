@@ -2,7 +2,7 @@
 
 ## Introduction
 
-The Elite Scholar React application is experiencing Vite build performance issues including bundle size warnings and mixed import pattern problems that prevent proper code splitting. The application uses React 18 + TypeScript + Vite with Ant Design UI components, Redux Toolkit, and multiple router files containing over 3000 lines of route definitions with mixed static and dynamic imports.
+The Elite Core React application is experiencing Vite build performance issues including bundle size warnings and mixed import pattern problems that prevent proper code splitting. The application uses React 18 + TypeScript + Vite with Ant Design UI components, Redux Toolkit, and multiple router files containing over 3000 lines of route definitions with mixed static and dynamic imports.
 
 ## Glossary
 

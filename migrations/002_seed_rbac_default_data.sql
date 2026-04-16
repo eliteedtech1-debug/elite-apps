@@ -1,5 +1,5 @@
 -- =====================================================
--- RBAC System Seeder - Elite Scholar
+-- RBAC System Seeder - Elite Core
 -- Description: Seed default roles and permissions
 -- Author: Claude Code
 -- Date: 2025-11-19

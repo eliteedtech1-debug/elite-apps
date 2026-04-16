@@ -206,8 +206,8 @@ function App() {
 
 ```json
 {
-  "name": "Elite Scholar",
-  "short_name": "Elite Scholar",
+  "name": "Elite Core",
+  "short_name": "Elite Core",
   "description": "School Management System",
   "start_url": "/",
   "display": "standalone",

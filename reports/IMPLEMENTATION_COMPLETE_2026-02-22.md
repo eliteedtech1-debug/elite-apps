@@ -375,4 +375,4 @@ curl -X POST 'http://localhost:34567/api/orm-payments/record-payment' \
 
 *Generated: 2026-02-22 19:00 UTC*
 *Developer: AI Assistant*
-*Project: Elite Scholar Financial System*
+*Project: Elite Core Financial System*

@@ -1,5 +1,5 @@
 -- =====================================================
--- Elite Scholar Database Migration
+-- Elite Core Database Migration
 -- Date: 2024-12-22
 -- Description: Staff Verification Feature
 -- Safe to re-run multiple times (idempotent)

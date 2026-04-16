@@ -2,7 +2,7 @@
 
 ## Overview
 
-This design document outlines the solution for fixing the online staff visibility issue in the Elite Scholar support chat system. The bug prevents regular users from seeing the "Online Staff" section automatically when agents are online, even though the data is correctly populated from the API.
+This design document outlines the solution for fixing the online staff visibility issue in the Elite Core support chat system. The bug prevents regular users from seeing the "Online Staff" section automatically when agents are online, even though the data is correctly populated from the API.
 
 The root cause is a React useEffect dependency array issue at lines 370-377 in `SupportChat.tsx`. The dependency array includes `showOnlineStaff`, which creates a logical contradiction: the effect can only run when `showOnlineStaff` changes, but it needs to run to SET `showOnlineStaff` to true. This prevents the auto-show logic from executing when the component mounts or when online staff data becomes available.
 

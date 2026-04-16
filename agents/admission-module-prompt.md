@@ -1100,4 +1100,4 @@ Ensure indexes/constraints do not break legacy data
 **Version:** 1.0  
 **Last Updated:** 2025-12-13  
 **Compatible with:** Claude, OpenCode, Gemini  
-**Project:** Elite Scholar - Admission Application Module
+**Project:** Elite Core - Admission Application Module

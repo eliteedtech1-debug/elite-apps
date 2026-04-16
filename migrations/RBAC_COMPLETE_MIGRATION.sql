@@ -1,5 +1,5 @@
 -- =====================================================
--- RBAC COMPLETE MIGRATION - Elite Scholar
+-- RBAC COMPLETE MIGRATION - Elite Core
 -- Description: Complete RBAC system setup in one file
 -- Author: Claude Code
 -- Date: 2025-11-19

@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This specification defines the requirements for migrating the Elite Scholar application from react-toastify library to Ant Design's native message component. The migration aims to reduce dependencies, improve consistency with the existing Ant Design UI framework, and maintain all current notification functionality while ensuring a seamless user experience.
+This specification defines the requirements for migrating the Elite Core application from react-toastify library to Ant Design's native message component. The migration aims to reduce dependencies, improve consistency with the existing Ant Design UI framework, and maintain all current notification functionality while ensuring a seamless user experience.
 
 ## Glossary
 

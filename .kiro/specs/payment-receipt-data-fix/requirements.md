@@ -2,7 +2,7 @@
 
 ## Introduction
 
-The Elite Scholar payment receipt system currently has critical data display issues that affect the accuracy and reliability of payment receipts generated for students. The Payment History shows correct data, but Receipt PDFs display incorrect information, leading to confusion and potential compliance issues.
+The Elite Core payment receipt system currently has critical data display issues that affect the accuracy and reliability of payment receipts generated for students. The Payment History shows correct data, but Receipt PDFs display incorrect information, leading to confusion and potential compliance issues.
 
 ## Glossary
 

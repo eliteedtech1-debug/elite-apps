@@ -1,3 +1,0 @@
-external_table	column	content_table
-assessment_criteria_enhanced	domain_id	knowledge_domains_enhanced
-ca_knowledge_domain_links	knowledge_domain_id	knowledge_domains_enhanced

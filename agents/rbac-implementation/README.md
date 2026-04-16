@@ -1,6 +1,6 @@
 # RBAC Implementation Project
 
-> **Project:** Elite Scholar Role-Based Access Control System Upgrade
+> **Project:** Elite Core Role-Based Access Control System Upgrade
 > **Version:** 1.0
 > **Date:** 2025-12-21
 > **Status:** Planning Phase
@@ -9,7 +9,7 @@
 
 ## 📋 Project Overview
 
-This project restructures the Elite Scholar RBAC system to:
+This project restructures the Elite Core RBAC system to:
 1. Remove legacy `users.accessTo` and `users.permissions` fields
 2. Implement hierarchical permission inheritance
 3. Enable superadmin feature restrictions for school onboarding

@@ -2,7 +2,7 @@
 
 ## Overview
 
-This design addresses critical issues in the Elite Scholar payment receipt system by implementing payment progression display and fixing JavaScript errors. The solution focuses on robust data handling, clear payment progression visualization, and maintaining backward compatibility while enhancing receipt functionality.
+This design addresses critical issues in the Elite Core payment receipt system by implementing payment progression display and fixing JavaScript errors. The solution focuses on robust data handling, clear payment progression visualization, and maintaining backward compatibility while enhancing receipt functionality.
 
 The design implements a data validation layer, payment progression calculator, and enhanced receipt templates that work with the existing `/api/student-payment-trace` API endpoint.
 

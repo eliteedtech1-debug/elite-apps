@@ -5,7 +5,7 @@
 
 set -e
 
-echo "🏗️  Elite Scholar Modularization Setup"
+echo "🏗️  Elite Core Modularization Setup"
 echo "======================================"
 echo ""
 

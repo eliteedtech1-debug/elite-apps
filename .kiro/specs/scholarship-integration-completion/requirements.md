@@ -2,7 +2,7 @@
 
 ## Introduction
 
-The Elite Scholar School Management System has a partially implemented scholarship integration system. The frontend components display scholarship information and the database schema supports scholarship data, but critical backend API endpoints are missing. This specification completes the scholarship integration to ensure students with scholarships have their discounts automatically applied during fee publishing, properly reflected in invoices, and correctly processed during payments while maintaining GAAP compliance.
+The Elite Core School Management System has a partially implemented scholarship integration system. The frontend components display scholarship information and the database schema supports scholarship data, but critical backend API endpoints are missing. This specification completes the scholarship integration to ensure students with scholarships have their discounts automatically applied during fee publishing, properly reflected in invoices, and correctly processed during payments while maintaining GAAP compliance.
 
 ## Glossary
 

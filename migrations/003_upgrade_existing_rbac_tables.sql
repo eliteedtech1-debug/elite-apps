@@ -1,5 +1,5 @@
 -- =====================================================
--- RBAC System Upgrade Migration - Elite Scholar
+-- RBAC System Upgrade Migration - Elite Core
 -- Description: Enhance existing RBAC tables for comprehensive role management
 -- Author: Claude Code
 -- Date: 2025-11-19

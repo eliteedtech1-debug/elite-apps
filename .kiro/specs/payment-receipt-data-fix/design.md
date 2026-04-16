@@ -2,7 +2,7 @@
 
 ## Overview
 
-The payment receipt data fix addresses critical data mapping and display issues in the Elite Scholar payment receipt system. The current system shows incorrect item types, zero payment amounts, and inconsistent balance calculations in PDF receipts, while the Payment History displays correct data. This design implements a comprehensive solution that ensures data consistency, proper categorization, and accurate partial payment tracking.
+The payment receipt data fix addresses critical data mapping and display issues in the Elite Core payment receipt system. The current system shows incorrect item types, zero payment amounts, and inconsistent balance calculations in PDF receipts, while the Payment History displays correct data. This design implements a comprehensive solution that ensures data consistency, proper categorization, and accurate partial payment tracking.
 
 ## Architecture
 

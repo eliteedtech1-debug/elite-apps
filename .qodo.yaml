@@ -1,9 +1,9 @@
-# Qodo Configuration for Elite Scholar Project
+# Qodo Configuration for Elite Core Project
 # This configuration file defines how Qodo should analyze and work with your codebase
 
 # Project Information
 project:
-  name: "Elite Scholar"
+  name: "Elite Core"
   description: "Full-stack educational management system with API backend and React frontend"
   version: "1.0.0"
   type: "fullstack"

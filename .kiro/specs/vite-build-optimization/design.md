@@ -2,7 +2,7 @@
 
 ## Overview
 
-This design addresses the Vite build optimization challenges in the Elite Scholar React application by implementing strategic code splitting, standardizing import patterns, and optimizing bundle configurations. The solution focuses on reducing bundle sizes below 1000 kB thresholds while maintaining application functionality and improving development experience.
+This design addresses the Vite build optimization challenges in the Elite Core React application by implementing strategic code splitting, standardizing import patterns, and optimizing bundle configurations. The solution focuses on reducing bundle sizes below 1000 kB thresholds while maintaining application functionality and improving development experience.
 
 The current application suffers from mixed import patterns in router files, oversized chunks, and inefficient code splitting. The optimization strategy involves restructuring the Vite configuration, standardizing lazy loading patterns, and implementing intelligent chunk splitting based on feature modules and usage patterns.
 

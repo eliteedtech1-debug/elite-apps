@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This document specifies the requirements for fixing the online staff visibility issue in the Elite Scholar support chat system. The issue prevents regular users from seeing the "Online Staff" section when agents (superadmins) are online, even though the data is correctly populated from the API. This bugfix ensures that all users can see which support staff members are available to assist them.
+This document specifies the requirements for fixing the online staff visibility issue in the Elite Core support chat system. The issue prevents regular users from seeing the "Online Staff" section when agents (superadmins) are online, even though the data is correctly populated from the API. This bugfix ensures that all users can see which support staff members are available to assist them.
 
 ## Glossary
 

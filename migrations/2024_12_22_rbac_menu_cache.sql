@@ -1,5 +1,5 @@
 -- =====================================================
--- Elite Scholar RBAC Menu Cache Migration
+-- Elite Core RBAC Menu Cache Migration
 -- Date: 2024-12-22
 -- Description: Updates menu cache with SuperAdmin & Developer sections
 -- Safe to re-run multiple times (replaces entire cache)

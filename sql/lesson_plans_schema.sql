@@ -1,5 +1,5 @@
 -- Lesson Plans and Notes Module - Database Schema
--- Generated for Elite Scholar School Management System
+-- Generated for Elite Core School Management System
 
 -- Create lesson_plans table
 CREATE TABLE IF NOT EXISTS lesson_plans (

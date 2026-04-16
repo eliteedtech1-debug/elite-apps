@@ -2,7 +2,7 @@
 
 ## Overview
 
-This design outlines the migration strategy from react-toastify to Ant Design's native message component in the Elite Scholar application. The migration will eliminate an external dependency while maintaining consistent user notification functionality using the existing Ant Design framework.
+This design outlines the migration strategy from react-toastify to Ant Design's native message component in the Elite Core application. The migration will eliminate an external dependency while maintaining consistent user notification functionality using the existing Ant Design framework.
 
 Based on research, Ant Design's message API provides equivalent functionality to react-toastify with similar method signatures and behavior patterns. The migration involves systematic replacement of toast method calls, import statement updates, and dependency cleanup.
 

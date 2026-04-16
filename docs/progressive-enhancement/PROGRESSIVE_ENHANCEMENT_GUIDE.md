@@ -1,7 +1,7 @@
 # Progressive Enhancement Implementation Guide
 ## Fix Blank Dashboards on Old Smartphones
 
-> **Goal:** Make Elite Scholar work on old phones (Android 4.x, iOS 9+, 2G/3G networks)
+> **Goal:** Make Elite Core work on old phones (Android 4.x, iOS 9+, 2G/3G networks)
 
 ---
 
@@ -65,7 +65,7 @@
   </style>
   <div class="app-loading">
     <div class="loading-card">
-      <h2 style="color: #333; margin: 0 0 10px 0;">Elite Scholar</h2>
+      <h2 style="color: #333; margin: 0 0 10px 0;">Elite Core</h2>
       <p style="color: #666; margin: 0 0 20px 0;">Loading your dashboard...</p>
       <div class="spinner"></div>
       <noscript>

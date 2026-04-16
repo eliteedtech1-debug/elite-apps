@@ -2,7 +2,7 @@
 
 ## Introduction
 
-The Family Payment Settlement Strategy feature addresses the critical need for strategic payment allocation in multi-child families within the Elite Scholar school management system. Currently, the system uses simple proportional allocation which can result in suboptimal outcomes where partial payments leave all children partially settled, potentially leading to all children being sent home despite payment being made.
+The Family Payment Settlement Strategy feature addresses the critical need for strategic payment allocation in multi-child families within the Elite Core school management system. Currently, the system uses simple proportional allocation which can result in suboptimal outcomes where partial payments leave all children partially settled, potentially leading to all children being sent home despite payment being made.
 
 This feature introduces multiple settlement strategies that allow parents to strategically allocate payments to maximize the number of children who remain in school during financial constraints, while providing school administrators with better cash flow management and payment tracking capabilities.
 

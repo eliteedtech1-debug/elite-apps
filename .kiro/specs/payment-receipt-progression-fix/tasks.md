@@ -2,7 +2,7 @@
 
 ## Overview
 
-This implementation plan addresses critical issues in the Elite Scholar payment receipt system by fixing JavaScript errors and implementing payment progression display. The approach focuses on creating robust data validation, payment progression calculation, and enhanced receipt generation while maintaining backward compatibility.
+This implementation plan addresses critical issues in the Elite Core payment receipt system by fixing JavaScript errors and implementing payment progression display. The approach focuses on creating robust data validation, payment progression calculation, and enhanced receipt generation while maintaining backward compatibility.
 
 ## Tasks
 

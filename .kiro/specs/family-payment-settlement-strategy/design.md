@@ -29,7 +29,7 @@ graph TB
 
 ### Integration Points
 
-The feature integrates with existing Elite Scholar components:
+The feature integrates with existing Elite Core components:
 
 1. **ParentPaymentsPage.tsx**: Main entry point, extends existing payment modal
 2. **PaymentCalculationService**: Leverages existing calculation engine
